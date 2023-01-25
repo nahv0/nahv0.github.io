@@ -390,7 +390,8 @@
 <h2 id="2-环境搭建"><a href="#2-环境搭建" class="headerlink" title="2. 环境搭建"></a>2. 环境搭建</h2><ul>
 <li><a target="_blank" rel="noopener" href="https://www.oracle.com/java/technologies/javase/javase8-archive-downloads.html">jdk8u65</a></li>
 <li><a href="hg.openjdk.java.net/jdk8u/jdk8u/jdk/rev/af660750b2f4">openJDK8u65</a></li>
-<li><a target="_blank" rel="noopener" href="https://maven.apache.org/docs/history.html">Maven 3.6.3</a></li>
+<li><a target="_blank" rel="noopener" href="https://maven.apache.org/docs/history.html">Maven 3.8.7</a></li>
+<li>commons-collections 3.2.1</li>
 </ul>
 <p>导入 Commons-Collections 的包</p>
 <pre class="line-numbers language-markup" data-language="markup"><code class="language-markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">&gt;</span></span>
@@ -401,7 +402,7 @@
 
 
 
-<h2 id="3-TransformedMap-版-CC1-攻击链分析"><a href="#3-TransformedMap-版-CC1-攻击链分析" class="headerlink" title="3. TransformedMap 版 CC1 攻击链分析"></a>3. TransformedMap 版 CC1 攻击链分析</h2><p>先寻找到一个危险方法，毕竟在没有危险方法可以利用的情况下讨论啥都白搭（没用）</p>
+<h2 id="3-TransformedMap-版-CC1-链分析"><a href="#3-TransformedMap-版-CC1-链分析" class="headerlink" title="3. TransformedMap 版 CC1 链分析"></a>3. TransformedMap 版 CC1 链分析</h2><p>先寻找到一个危险方法，毕竟在没有危险方法可以利用的情况下讨论啥都白搭（没用）</p>
 <h3 id="3-1-危险方法"><a href="#3-1-危险方法" class="headerlink" title="3.1 危险方法"></a>3.1 危险方法</h3><p>根据前人的总结，先查看下 Transformer 接口</p>
 <ul>
 <li>Transformer 关键代码</li>
@@ -478,10 +479,10 @@
 
 
 <p>运行截图</p>
-<p><img src="/2023/01/21/java-fan-xu-lie-hua-commons-collections-pian-cc1-lian/image-20230121235756785.png"></p>
+<p><img src="/image-20230121235756785.png"></p>
 <p>成功弹出了计算器，下一步的目标是去寻找哪里调用了 <code>transform()</code> 方法</p>
 <h3 id="3-2-上级链子"><a href="#3-2-上级链子" class="headerlink" title="3.2 上级链子"></a>3.2 上级链子</h3><p>右键查找用法</p>
-<p><img src="/2023/01/21/java-fan-xu-lie-hua-commons-collections-pian-cc1-lian/image-20230122000222469.png"></p>
+<p><img src="/image-20230122000222469.png"></p>
 <p>可以看到 <code>LazyMap</code> 中也调用了该方法，这个一会讨论</p>
 <p>节省下时间直接跟进 <code>TransformedMap.checkSetValue()</code> 方法</p>
 <ul>
@@ -528,7 +529,7 @@
 
 
 <p>在 <code>MapEntry.setValue()</code> 中调用了 <code>AbstractInputCheckedMapDecorator.checkSetValue()</code> ，且 <code>TransformedMap</code> 继承了该类，因此可以通过此处调用 <code>TransformedMap.checkSetValue()</code>，继续向上找y</p>
-<p><img src="/2023/01/21/java-fan-xu-lie-hua-commons-collections-pian-cc1-lian/image-20230122005644321.png"></p>
+<p><img src="/image-20230122005644321.png"></p>
 <p>最后找到了 <code>AnnotationInvocationHandler</code> </p>
 <ul>
 <li>AnnotationInvocationHandler 关键代码</li>
@@ -579,18 +580,18 @@
 
 
 <p>这岂不是很完美，使用 MapEntry 遍历并且直接在 readObject 中调用了目标方法，但是要调用目标方法还需要绕过两个if</p>
-<p><img src="/2023/01/21/java-fan-xu-lie-hua-commons-collections-pian-cc1-lian/image-20230104000023.png"> </p>
+<p><img src="/image-20230104000023.png"> </p>
 <p>该类继承了 InvocationHandler，也就意味着可以通过动态代理进行调用，不过这里暂时用不到</p>
-<p>由此得出攻击链</p>
-<h3 id="3-3-完整链子"><a href="#3-3-完整链子" class="headerlink" title="3.3 完整链子"></a>3.3 完整链子</h3><pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token class-name">AnnotationInvocationHandler</span><span class="token punctuation">.</span><span class="token function">readObject</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-<span class="token class-name">MapEntry</span><span class="token punctuation">.</span><span class="token function">setValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-<span class="token class-name">TransformedMap</span><span class="token punctuation">.</span><span class="token function">checkSetValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-<span class="token class-name">InvokerTransformer</span><span class="token punctuation">.</span><span class="token function">transform</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<p>由此得出链</p>
+<h3 id="3-3-完整链子"><a href="#3-3-完整链子" class="headerlink" title="3.3 完整链子"></a>3.3 完整链子</h3><pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token operator">-&gt;</span> <span class="token class-name">AnnotationInvocationHandler</span><span class="token punctuation">.</span><span class="token function">readObject</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token operator">-&gt;</span> <span class="token class-name">MapEntry</span><span class="token punctuation">.</span><span class="token function">setValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token operator">-&gt;</span> <span class="token class-name">TransformedMap</span><span class="token punctuation">.</span><span class="token function">checkSetValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token operator">-&gt;</span> <span class="token class-name">InvokerTransformer</span><span class="token punctuation">.</span><span class="token function">transform</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
     <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 
 
-<h2 id="4-TransformedMap-版-CC1-攻击链手写-EXP"><a href="#4-TransformedMap-版-CC1-攻击链手写-EXP" class="headerlink" title="4. TransformedMap 版 CC1 攻击链手写 EXP"></a>4. TransformedMap 版 CC1 攻击链手写 EXP</h2><p>这里还需要解决三个问题</p>
+<h2 id="4-TransformedMap-版-CC1-链手写-EXP"><a href="#4-TransformedMap-版-CC1-链手写-EXP" class="headerlink" title="4. TransformedMap 版 CC1 链手写 EXP"></a>4. TransformedMap 版 CC1 链手写 EXP</h2><p>这里还需要解决三个问题</p>
 <ul>
 <li>Runtime 的序列化</li>
 <li>if 的绕过</li>
@@ -617,7 +618,7 @@
 
 
 <p>运行截图</p>
-<p><img src="/2023/01/21/java-fan-xu-lie-hua-commons-collections-pian-cc1-lian/image-20230122012456396.png"></p>
+<p><img src="/image-20230122012456396.png"></p>
 <p>这是我们直接通过反射调用实现的命令执行，将其改造一下构造成通过 <code>InvokerTransformer</code> 进行反射</p>
 <ul>
 <li>Exploit.java</li>
@@ -671,7 +672,7 @@
 
 
 <p>运行结果</p>
-<p><img src="/2023/01/21/java-fan-xu-lie-hua-commons-collections-pian-cc1-lian/image-20230122013848871.png"></p>
+<p><img src="/image-20230122013848871.png"></p>
 <p>到此解决了 Runtime 序列化的问题</p>
 <h3 id="4-2-setValue-传参"><a href="#4-2-setValue-传参" class="headerlink" title="4.2 setValue 传参"></a>4.2 setValue 传参</h3><p>根据审计源码可知固定的传参内容为一个 <code>AnnotationTypeMismatchExceptionProxy</code> 类，没法传入我们所需的 <code>Runtime.class</code> </p>
 <p>因此需要引入第二个辅助类 <code>ConstantTransformer</code></p>
@@ -725,8 +726,8 @@
 
 
 <p>运行结果</p>
-<p><img src="/2023/01/21/java-fan-xu-lie-hua-commons-collections-pian-cc1-lian/image-20230122014652524.png"></p>
-<h3 id="4-3-if-绕过"><a href="#4-3-if-绕过" class="headerlink" title="4.3 if 绕过"></a>4.3 if 绕过</h3><p><img src="/2023/01/21/java-fan-xu-lie-hua-commons-collections-pian-cc1-lian/image-20230104000023.png"></p>
+<p><img src="/image-20230122014652524.png"></p>
+<h3 id="4-3-if-绕过"><a href="#4-3-if-绕过" class="headerlink" title="4.3 if 绕过"></a>4.3 if 绕过</h3><p><img src="/image-20230104000023.png"></p>
 <p><code>memberValues</code> 与 <code>type</code> 都是通过构造方法传入，但是该构造方法未加修饰符即为使用 default，可以通过反射进行调用构造该类</p>
 <p>根据调试信息编写 EXP</p>
 <h3 id="4-4-完整-EXP"><a href="#4-4-完整-EXP" class="headerlink" title="4.4 完整 EXP"></a>4.4 完整 EXP</h3><ul>
@@ -799,8 +800,8 @@
 
 
 <p>运行截图</p>
-<p><img src="/2023/01/21/java-fan-xu-lie-hua-commons-collections-pian-cc1-lian/image-20230122020800215.png"></p>
-<h2 id="5-LazyMap-版-CC1-攻击链分析"><a href="#5-LazyMap-版-CC1-攻击链分析" class="headerlink" title="5. LazyMap 版 CC1 攻击链分析"></a>5. LazyMap 版 CC1 攻击链分析</h2><h3 id="5-1-危险方法"><a href="#5-1-危险方法" class="headerlink" title="5.1 危险方法"></a>5.1 危险方法</h3><p>危险方法的位置与 TransformedMap 中的一致，这里就不再分析了</p>
+<p><img src="/image-20230122020800215.png"></p>
+<h2 id="5-LazyMap-版-CC1-链分析"><a href="#5-LazyMap-版-CC1-链分析" class="headerlink" title="5. LazyMap 版 CC1 链分析"></a>5. LazyMap 版 CC1 链分析</h2><h3 id="5-1-危险方法"><a href="#5-1-危险方法" class="headerlink" title="5.1 危险方法"></a>5.1 危险方法</h3><p>危险方法的位置与 TransformedMap 中的一致，这里就不再分析了</p>
 <h3 id="5-2-上级链子"><a href="#5-2-上级链子" class="headerlink" title="5.2 上级链子"></a>5.2 上级链子</h3><p>前文提到了一下 <code>LazyMap</code> 中也对 <code>transform</code> 方法进行了调用</p>
 <ul>
 <li>LazyMap 关键代码</li>
@@ -892,13 +893,13 @@
 
 
 <p>运行结果</p>
-<p><img src="/2023/01/21/java-fan-xu-lie-hua-commons-collections-pian-cc1-lian/image-20230122140926956.png"></p>
+<p><img src="/image-20230122140926956.png"></p>
 <p>这部分生效了，接下来就是寻找从哪个地方调用 <code>LazyMap.get()</code></p>
 <p>这里还是利用 <code>AnnotationInvocationHandler</code> 这个类</p>
-<p><img src="/2023/01/21/java-fan-xu-lie-hua-commons-collections-pian-cc1-lian/image-20230122142225252.png"></p>
+<p><img src="/image-20230122142225252.png"></p>
 <p>在 <code>AnnotationInvocationHandler.invoke</code> 中调用了 <code>Map.get</code> 方法</p>
 <p>需要调用 <code>invoke</code> 方法，可以通过动态代理进行调用，一个类被动态代理了之后，想要通过代理调用这个类的方法，就一定会调用 invoke() 方法。我们去找一找能利用的地方</p>
-<p><img src="/2023/01/21/java-fan-xu-lie-hua-commons-collections-pian-cc1-lian/image-20230122142122669.png"></p>
+<p><img src="/image-20230122142122669.png"></p>
 <p>可以在 <code>memberValues</code>传入一个代理然后调用 <code>entrySet</code> 时触发 <code>invoke</code> </p>
 <h3 id="5-3-完整链子"><a href="#5-3-完整链子" class="headerlink" title="5.3 完整链子"></a>5.3 完整链子</h3><pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token operator">-&gt;</span> <span class="token class-name">AnnotationInvocationHandler</span><span class="token punctuation">.</span><span class="token function">readObject</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token operator">-&gt;</span> <span class="token class-name">AnnotationInvocationHandler</span><span class="token punctuation">.</span><span class="token function">invoke</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
@@ -909,7 +910,7 @@
 
 
 
-<h2 id="6-LazyMap-版-CC1-攻击链手写-EXP"><a href="#6-LazyMap-版-CC1-攻击链手写-EXP" class="headerlink" title="6. LazyMap 版 CC1 攻击链手写 EXP"></a>6. LazyMap 版 CC1 攻击链手写 EXP</h2><p>根据上面的分析构造 EXP</p>
+<h2 id="6-LazyMap-版-CC1-链手写-EXP"><a href="#6-LazyMap-版-CC1-链手写-EXP" class="headerlink" title="6. LazyMap 版 CC1 链手写 EXP"></a>6. LazyMap 版 CC1 链手写 EXP</h2><p>根据上面的分析构造 EXP</p>
 <h3 id="6-1-完整-EXP"><a href="#6-1-完整-EXP" class="headerlink" title="6.1 完整 EXP"></a>6.1 完整 EXP</h3><ul>
 <li>Exploit.java</li>
 </ul>
@@ -980,7 +981,7 @@
 
 
 <h2 id="7-参考链接"><a href="#7-参考链接" class="headerlink" title="7. 参考链接"></a>7. 参考链接</h2><p><a target="_blank" rel="noopener" href="https://github.com/frohoff/ysoserial">ysoserial</a></p>
-<p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1no4y1U7E1/?spm_id_from=333.1007.top_right_bar_window_default_collection.content.click&amp;vd_source=dd26cd5a62866062ca6f169ff25165f0">Java反序列化CommonsCollections篇(一) CC1链手写EXP</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1no4y1U7E1/?spm_id_from=333.788">Java反序列化CommonsCollections篇(一) CC1链手写EXP</a></p>
 <p><a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/9409#toc-1">CC链 1-7 分析</a></p>
 
                 
