@@ -400,8 +400,6 @@
 	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>version</span><span class="token punctuation">&gt;</span></span>3.2.1<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>version</span><span class="token punctuation">&gt;</span></span>
 <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
-
-
 <h2 id="3-TransformedMap-版-CC1-链分析"><a href="#3-TransformedMap-版-CC1-链分析" class="headerlink" title="3. TransformedMap 版 CC1 链分析"></a>3. TransformedMap 版 CC1 链分析</h2><p>先寻找到一个危险方法，毕竟在没有危险方法可以利用的情况下讨论啥都白搭（没用）</p>
 <h3 id="3-1-危险方法"><a href="#3-1-危险方法" class="headerlink" title="3.1 危险方法"></a>3.1 危险方法</h3><p>根据前人的总结，先查看下 Transformer 接口</p>
 <ul>
@@ -413,8 +411,6 @@
     
 <span class="token punctuation">}</span>
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
-
 
 <p>声明了一个 <code>transform</code> 方法，查看哪个类实现了可以利用的地方，这里找到了 <code>InvokerTransformer</code> 类</p>
 <ul>
@@ -456,8 +452,6 @@
 <span class="token punctuation">}</span>
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
-
-
 <p>可以看到 <code>InvokerTransformer.transform()</code> 其中可以调用指定类的指定方法，且参数可控，先写个简单的 Exp 测试一下</p>
 <ul>
 <li>Exploit.java</li>
@@ -475,8 +469,6 @@
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
-
 
 <p>运行截图</p>
 <p><img src="/image-20230121235756785.png"></p>
@@ -502,8 +494,6 @@
 <span class="token punctuation">}</span>
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
-
-
 <p><code>checkSetValue()</code> 不能直接进行调用，继续向上找哪里使用了该方法</p>
 <ul>
 <li>AbstractInputCheckedMapDecorator 关键代码</li>
@@ -525,8 +515,6 @@
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
-
 
 <p>在 <code>MapEntry.setValue()</code> 中调用了 <code>AbstractInputCheckedMapDecorator.checkSetValue()</code> ，且 <code>TransformedMap</code> 继承了该类，因此可以通过此处调用 <code>TransformedMap.checkSetValue()</code>，继续向上找y</p>
 <p><img src="/image-20230122005644321.png"></p>
@@ -577,8 +565,6 @@
 <span class="token punctuation">}</span>
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
-
-
 <p>这岂不是很完美，使用 MapEntry 遍历并且直接在 readObject 中调用了目标方法，但是要调用目标方法还需要绕过两个if</p>
 <p><img src="/image-20230104000023.png"> </p>
 <p>该类继承了 InvocationHandler，也就意味着可以通过动态代理进行调用，不过这里暂时用不到</p>
@@ -586,10 +572,7 @@
 <h3 id="3-3-完整链子"><a href="#3-3-完整链子" class="headerlink" title="3.3 完整链子"></a>3.3 完整链子</h3><pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token operator">-&gt;</span> <span class="token class-name">AnnotationInvocationHandler</span><span class="token punctuation">.</span><span class="token function">readObject</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token operator">-&gt;</span> <span class="token class-name">MapEntry</span><span class="token punctuation">.</span><span class="token function">setValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token operator">-&gt;</span> <span class="token class-name">TransformedMap</span><span class="token punctuation">.</span><span class="token function">checkSetValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-<span class="token operator">-&gt;</span> <span class="token class-name">InvokerTransformer</span><span class="token punctuation">.</span><span class="token function">transform</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-    <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
-
+<span class="token operator">-&gt;</span> <span class="token class-name">InvokerTransformer</span><span class="token punctuation">.</span><span class="token function">transform</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h2 id="4-TransformedMap-版-CC1-链手写-EXP"><a href="#4-TransformedMap-版-CC1-链手写-EXP" class="headerlink" title="4. TransformedMap 版 CC1 链手写 EXP"></a>4. TransformedMap 版 CC1 链手写 EXP</h2><p>这里还需要解决三个问题</p>
 <ul>
@@ -615,8 +598,6 @@
 <span class="token punctuation">}</span>
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
-
-
 <p>运行截图</p>
 <p><img src="/image-20230122012456396.png"></p>
 <p>这是我们直接通过反射调用实现的命令执行，将其改造一下构造成通过 <code>InvokerTransformer</code> 进行反射</p>
@@ -640,8 +621,6 @@
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
-
 
 <p>重复编写代码显得有些冗余，这里可以使用 <code>ChainedTransformer</code> 对其进行简化</p>
 <p><code>ChainedTransformer</code> 类下的 <code>transform</code> 方法递归调用了前一个方法的结果，作为后一个方法的参数。</p>
@@ -669,8 +648,6 @@
 <span class="token punctuation">}</span>
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
-
-
 <p>运行结果</p>
 <p><img src="/image-20230122013848871.png"></p>
 <p>到此解决了 Runtime 序列化的问题</p>
@@ -694,9 +671,7 @@
 <span class="token punctuation">}</span>
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
-
-
-<p>可知在执行 <code>transform</code> 时会直接将可控内容返回，可以在此处传入 <code>Runtime.class</code></p>
+<p>可知执行 <code>transform</code> 时会直接将可控内容返回，可以在此处传入 <code>Runtime.class</code></p>
 <ul>
 <li>Exploit.java</li>
 </ul>
@@ -722,8 +697,6 @@
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
-
 
 <p>运行结果</p>
 <p><img src="/image-20230122014652524.png"></p>
