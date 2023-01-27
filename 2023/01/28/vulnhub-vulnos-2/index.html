@@ -402,7 +402,7 @@
 <p>接下来回到 80 端口开始渗透</p>
 <h2 id="3-WEB-信息收集"><a href="#3-WEB-信息收集" class="headerlink" title="3. WEB 信息收集"></a>3. WEB 信息收集</h2><h3 id="3-1-功能点检测"><a href="#3-1-功能点检测" class="headerlink" title="3.1 功能点检测"></a>3.1 功能点检测</h3><p>访问 <a target="_blank" rel="noopener" href="http://192.168.0.100/">http://192.168.0.100/</a></p>
 <p>一个介绍页面，给了题目环境地址，查看页面源代码也没啥特殊的东西</p>
-<p><img src="/image-20230128025301896.png" alt="image-20230128025301896"></p>
+<p><img src="/2023/01/28/vulnhub-vulnos-2/image-20230128025301896.png"></p>
 <p>跟进给出的新链接 <a target="_blank" rel="noopener" href="http://192.168.0.100/jabc/">http://192.168.0.100/jabc/</a></p>
 <p>一个公司的介绍页面，经营着人工智能模型的销售</p>
 <p><img src="/2023/01/28/vulnhub-vulnos-2/image-20230128025409856.png"></p>
@@ -485,7 +485,7 @@
 <p>找一下提权脚本</p>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">searchsploit <span class="token parameter variable">--cve</span> <span class="token number">2021</span>-4034<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
-<p><img src="/image-20230128051407779.png" alt="image-20230128051407779"></p>
+<p><img src="/2023/01/28/vulnhub-vulnos-2/image-20230128051407779.png"></p>
 <p>提供的文档中给出了 exp</p>
 <p><img src="/2023/01/28/vulnhub-vulnos-2/image-20230128052802578.png"></p>
 <h3 id="4-3-脏牛提权"><a href="#4-3-脏牛提权" class="headerlink" title="4.3 脏牛提权"></a>4.3 脏牛提权</h3><p>使用 40847</p>
