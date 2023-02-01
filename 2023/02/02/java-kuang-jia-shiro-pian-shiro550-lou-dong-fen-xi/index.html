@@ -374,7 +374,7 @@
 <p>默认用户为  root / secret</p>
 <h2 id="3-Shiro550-漏洞分析"><a href="#3-Shiro550-漏洞分析" class="headerlink" title="3. Shiro550 漏洞分析"></a>3. Shiro550 漏洞分析</h2><p>3.1 漏洞原理</p>
 <p>勾选 RememberMe 字段，登陆成功的话，返回包 set-Cookie 会有 rememberMe=deleteMe 字段，还会有 rememberMe 字段，之后的所有请求中 Cookie 都会有 rememberMe 字段，那么就可以利用这个 rememberMe 进行反序列化，从而 getshell。</p>
-<p><img src="/Pasted%20image%2020230120214359.png"></p>
+<p><img src="/2023/02/02/java-kuang-jia-shiro-pian-shiro550-lou-dong-fen-xi/Pasted-image-20230120214359.png"></p>
 <p>Shiro1.2.4 及之前的版本中，AES 加密的密钥默认硬编码在代码里（Shiro-550），Shiro 1.2.4 以上版本官方移除了代码中的默认密钥，要求开发者自己设置，如果开发者没有设置，则默认动态生成，降低了固定密钥泄漏的风险。</p>
 <h3 id="3-2-漏洞角度分析-Cookie"><a href="#3-2-漏洞角度分析-Cookie" class="headerlink" title="3.2 漏洞角度分析 Cookie"></a>3.2 漏洞角度分析 Cookie</h3><p>我们还是从一个漏洞发现者的角度出发，而不是跟着 IDEA 打断点走一遍就可以的。</p>
 <p>首先在抓包的情况下，我们在拿到这一 Cookie 的时候，很明显能够看到这是经过某种加密的。因为我们平常的 Cookie 都是比较短的，而 shiro RememberMe 字段的 Cookie 太长了。</p>
@@ -427,7 +427,7 @@
 
 <p>该部分方法先获取到 Cookie 中的 rememberMe，然后判断是否为 deleteMe，不是则判断是否是符合 base64 的编码长度，然后再对其进行 base64 解码，将解码结果返回。</p>
 <p>看一下哪里调用了该部分方法获取 Cookie</p>
-<p><img src="/Pasted%20image%2020230120220326.png"></p>
+<p><img src="/2023/02/02/java-kuang-jia-shiro-pian-shiro550-lou-dong-fen-xi/Pasted-image-20230120220326.png"></p>
 <pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token class-name">PrincipalCollection</span> <span class="token function">getRememberedPrincipals</span><span class="token punctuation">(</span><span class="token class-name">SubjectContext</span> subjectContext<span class="token punctuation">)</span> <span class="token punctuation">{</span>
         <span class="token class-name">PrincipalCollection</span> principals <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
         <span class="token keyword">try</span> <span class="token punctuation">{</span>
@@ -573,9 +573,9 @@
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
-<p><img src="/Pasted%20image%2020230120232924.png"></p>
+<p><img src="/2023/02/02/java-kuang-jia-shiro-pian-shiro550-lou-dong-fen-xi/Pasted-image-20230120232924.png"></p>
 <p>查看 DNSLOG 平台</p>
-<p><img src="/Pasted%20image%2020230120232931.png"></p>
+<p><img src="/2023/02/02/java-kuang-jia-shiro-pian-shiro550-lou-dong-fen-xi/Pasted-image-20230120232931.png"></p>
 <h3 id="4-2-CC11-链攻击"><a href="#4-2-CC11-链攻击" class="headerlink" title="4.2 CC11 链攻击"></a>4.2 CC11 链攻击</h3><pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token keyword">package</span> <span class="token namespace">org<span class="token punctuation">.</span>example</span><span class="token punctuation">;</span>
 
 <span class="token keyword">import</span> <span class="token import"><span class="token namespace">com<span class="token punctuation">.</span>sun<span class="token punctuation">.</span>org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>xalan<span class="token punctuation">.</span>internal<span class="token punctuation">.</span>xsltc<span class="token punctuation">.</span>trax<span class="token punctuation">.</span></span><span class="token class-name">TemplatesImpl</span></span><span class="token punctuation">;</span>
