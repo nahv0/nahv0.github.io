@@ -400,7 +400,6 @@
 <p>探测下技术</p>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">whatweb http://192.168.0.151/<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
-<p><img src="/image-20230202070755596.png" alt="image-20230202070755596"></p>
 <p>挺干净的，扫描了一下目录没有啥收获</p>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">gobuster <span class="token function">dir</span> <span class="token parameter variable">-u</span> <span class="token string">"http://192.168.0.151/"</span> <span class="token parameter variable">-w</span> <span class="token string">"/usr/share/SecLists/Discovery/Web-Content/directory-list-2.3-small.txt"</span> <span class="token parameter variable">-x</span> <span class="token string">"php,html,zip"</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
