@@ -353,18 +353,23 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    1.2k
+                    3k
                 </div>
                 
 
                 
                 <div class="info-break-policy">
                     <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    4 分
+                    11 分
                 </div>
                 
 
                 
+                    <div id="busuanzi_container_page_pv" class="info-break-policy">
+                        <i class="far fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
+                        <span id="busuanzi_value_page_pv"></span>
+                    </div>
+				
             </div>
         </div>
         <hr class="clearfix">
@@ -384,14 +389,10 @@
 <p>既然是远程调用那必然存在客户端与服务端</p>
 <p>RMI 程序通常包括</p>
 <ul>
-<li><p>Registry：提供服务注册与服务获取。即Server端向Registry注册服务，比如地址、端口等一些信息，Client端从Registry获取远程对象的一些信息，如地址、端口等，然后进行远程调用。</p>
-</li>
-<li><p>Server：远程方法的提供者，并向Registry注册自身提供的服务</p>
-</li>
-<li><p>Client：远程方法的消费者，从Registry获取远程方法的相关信息并且调用</p>
-</li>
+<li>Registry：提供服务注册与服务获取。即Server端向Registry注册服务，比如地址、端口等一些信息，Client端从Registry获取远程对象的一些信息，如地址、端口等，然后进行远程调用。</li>
+<li>Server：远程方法的提供者，并向Registry注册自身提供的服务</li>
+<li>Client：远程方法的消费者，从Registry获取远程方法的相关信息并且调用</li>
 </ul>
-<p><img src="file:///E:/nah-v0.github.io/source/_posts/%E5%BA%9F%E7%A8%BF/Java-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96-RMI-%E7%AF%87-RMI-%E5%9F%BA%E7%A1%80/image-20230130184659578.png?lastModify=1677743961"></p>
 <p>RMI 的核心和独特功能之一是它能够下载对象类的定义（如果类未在接收方的 Java 虚拟机中定义）。 一个对象的所有类型和行为，以前只能在单个 Java 虚拟机中使用，现在可以传输到另一个可能是远程的 Java 虚拟机。 RMI 通过对象的实际类传递对象，因此当对象被发送到另一个 Java 虚拟机时，对象的行为不会改变。 此功能允许将新类型和行为引入远程 Java 虚拟机，从而动态扩展应用程序的行为。</p>
 <h2 id="3-RMI-简单实现"><a href="#3-RMI-简单实现" class="headerlink" title="3. RMI 简单实现"></a>3. RMI 简单实现</h2><p>完整的 RMI 需要客户端与服务端</p>
 <p>这里参考<a target="_blank" rel="noopener" href="https://www.liaoxuefeng.com/wiki/1252599548343744/1323711850348577">RMI远程调用</a>实现一个简单地案例，服务端提供 WorldClock 用于获取指定时区的时间</p>
@@ -408,50 +409,59 @@
 <span class="token keyword">public</span> <span class="token keyword">interface</span> <span class="token class-name">WorldClock</span> <span class="token keyword">extends</span> <span class="token class-name">Remote</span> <span class="token punctuation">{</span>  
     <span class="token class-name">LocalDateTime</span> <span class="token function">getLocalDateTime</span><span class="token punctuation">(</span><span class="token class-name">String</span> zoneId<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">RemoteException</span><span class="token punctuation">;</span>  
 <span class="token punctuation">}</span>  <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>​</p>
-<p>然后是实现类</p>
+<p>​<br>然后是实现类</p>
 <ul>
 <li>WorldClockImpl</li>
 </ul>
 <pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token keyword">package</span> <span class="token namespace">org<span class="token punctuation">.</span>example<span class="token punctuation">.</span>server</span><span class="token punctuation">;</span>  
-​  
+  
 <span class="token keyword">import</span> <span class="token import"><span class="token namespace">java<span class="token punctuation">.</span>rmi<span class="token punctuation">.</span></span><span class="token class-name">RemoteException</span></span><span class="token punctuation">;</span>  
+<span class="token keyword">import</span> <span class="token import"><span class="token namespace">java<span class="token punctuation">.</span>rmi<span class="token punctuation">.</span>server<span class="token punctuation">.</span></span><span class="token class-name">RMIClientSocketFactory</span></span><span class="token punctuation">;</span>  
+<span class="token keyword">import</span> <span class="token import"><span class="token namespace">java<span class="token punctuation">.</span>rmi<span class="token punctuation">.</span>server<span class="token punctuation">.</span></span><span class="token class-name">RMIServerSocketFactory</span></span><span class="token punctuation">;</span>  
+<span class="token keyword">import</span> <span class="token import"><span class="token namespace">java<span class="token punctuation">.</span>rmi<span class="token punctuation">.</span>server<span class="token punctuation">.</span></span><span class="token class-name">UnicastRemoteObject</span></span><span class="token punctuation">;</span>  
 <span class="token keyword">import</span> <span class="token import"><span class="token namespace">java<span class="token punctuation">.</span>time<span class="token punctuation">.</span></span><span class="token class-name">LocalDateTime</span></span><span class="token punctuation">;</span>  
 <span class="token keyword">import</span> <span class="token import"><span class="token namespace">java<span class="token punctuation">.</span>time<span class="token punctuation">.</span></span><span class="token class-name">ZoneId</span></span><span class="token punctuation">;</span>  
-​  
-<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">WorldClockImpl</span> <span class="token keyword">implements</span> <span class="token class-name">WorldClock</span> <span class="token punctuation">{</span>  
+  
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">WorldClockImpl</span> <span class="token keyword">extends</span> <span class="token class-name">UnicastRemoteObject</span> <span class="token keyword">implements</span> <span class="token class-name">WorldClock</span> <span class="token punctuation">{</span>  
+    <span class="token keyword">protected</span> <span class="token class-name">WorldClockImpl</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">RemoteException</span> <span class="token punctuation">{</span>  
+    <span class="token punctuation">}</span>  
+    <span class="token keyword">protected</span> <span class="token class-name">WorldClockImpl</span><span class="token punctuation">(</span><span class="token keyword">int</span> port<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">RemoteException</span> <span class="token punctuation">{</span>  
+        <span class="token keyword">super</span><span class="token punctuation">(</span>port<span class="token punctuation">)</span><span class="token punctuation">;</span>  
+    <span class="token punctuation">}</span>  
+  
+    <span class="token keyword">protected</span> <span class="token class-name">WorldClockImpl</span><span class="token punctuation">(</span><span class="token keyword">int</span> port<span class="token punctuation">,</span> <span class="token class-name">RMIClientSocketFactory</span> csf<span class="token punctuation">,</span> <span class="token class-name">RMIServerSocketFactory</span> ssf<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">RemoteException</span> <span class="token punctuation">{</span>  
+        <span class="token keyword">super</span><span class="token punctuation">(</span>port<span class="token punctuation">,</span> csf<span class="token punctuation">,</span> ssf<span class="token punctuation">)</span><span class="token punctuation">;</span>  
+    <span class="token punctuation">}</span>  
+  
     <span class="token annotation punctuation">@Override</span>  
     <span class="token keyword">public</span> <span class="token class-name">LocalDateTime</span> <span class="token function">getLocalDateTime</span><span class="token punctuation">(</span><span class="token class-name">String</span> zoneId<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">RemoteException</span> <span class="token punctuation">{</span>  
         <span class="token keyword">return</span> <span class="token class-name">LocalDateTime</span><span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token class-name">ZoneId</span><span class="token punctuation">.</span><span class="token function">of</span><span class="token punctuation">(</span>zoneId<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">withNano</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  
     <span class="token punctuation">}</span>  
-<span class="token punctuation">}</span>  <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>​</p>
 <p>编写服务端</p>
 <ul>
 <li>WorldClockServer</li>
 </ul>
 <pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token keyword">package</span> <span class="token namespace">org<span class="token punctuation">.</span>example<span class="token punctuation">.</span>server</span><span class="token punctuation">;</span>  
-​  
+  
 <span class="token keyword">import</span> <span class="token import"><span class="token namespace">java<span class="token punctuation">.</span>rmi<span class="token punctuation">.</span></span><span class="token class-name">AlreadyBoundException</span></span><span class="token punctuation">;</span>  
 <span class="token keyword">import</span> <span class="token import"><span class="token namespace">java<span class="token punctuation">.</span>rmi<span class="token punctuation">.</span></span><span class="token class-name">RemoteException</span></span><span class="token punctuation">;</span>  
 <span class="token keyword">import</span> <span class="token import"><span class="token namespace">java<span class="token punctuation">.</span>rmi<span class="token punctuation">.</span>registry<span class="token punctuation">.</span></span><span class="token class-name">LocateRegistry</span></span><span class="token punctuation">;</span>  
 <span class="token keyword">import</span> <span class="token import"><span class="token namespace">java<span class="token punctuation">.</span>rmi<span class="token punctuation">.</span>registry<span class="token punctuation">.</span></span><span class="token class-name">Registry</span></span><span class="token punctuation">;</span>  
 <span class="token keyword">import</span> <span class="token import"><span class="token namespace">java<span class="token punctuation">.</span>rmi<span class="token punctuation">.</span>server<span class="token punctuation">.</span></span><span class="token class-name">UnicastRemoteObject</span></span><span class="token punctuation">;</span>  
-​  
+  
 <span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">WorldClockServer</span> <span class="token punctuation">{</span>  
     <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">RemoteException</span><span class="token punctuation">,</span> <span class="token class-name">AlreadyBoundException</span> <span class="token punctuation">{</span>  
         <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"create World clock remote service..."</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  
         <span class="token comment">// 实例化一个WorldClock:  </span>
         <span class="token class-name">WorldClockImpl</span> worldClockImpl <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">WorldClockImpl</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  
-        <span class="token comment">// 将此服务转换为远程服务接口:  </span>
-        <span class="token class-name">WorldClock</span> skeleton <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token class-name">WorldClock</span><span class="token punctuation">)</span> <span class="token class-name">UnicastRemoteObject</span><span class="token punctuation">.</span><span class="token function">exportObject</span><span class="token punctuation">(</span>worldClockImpl<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  
         <span class="token comment">// 将RMI服务注册到1099端口:  </span>
         <span class="token class-name">Registry</span> registry <span class="token operator">=</span> <span class="token class-name">LocateRegistry</span><span class="token punctuation">.</span><span class="token function">createRegistry</span><span class="token punctuation">(</span><span class="token number">1099</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  
         <span class="token comment">// 注册此服务，服务名为"WorldClock":  </span>
-        registry<span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span><span class="token string">"WorldClock"</span><span class="token punctuation">,</span> skeleton<span class="token punctuation">)</span><span class="token punctuation">;</span>  
+        registry<span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span><span class="token string">"WorldClock"</span><span class="token punctuation">,</span> worldClockImpl<span class="token punctuation">)</span><span class="token punctuation">;</span>  
     <span class="token punctuation">}</span>  
-<span class="token punctuation">}</span>  
-​<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h3 id="3-2-RMI-客服端"><a href="#3-2-RMI-客服端" class="headerlink" title="3.2 RMI 客服端"></a>3.2 RMI 客服端</h3><p>客户端要做的只有从服务端获取远程对象然后调用其对应的方法，实例化远程对象前提本地还是要有一个对应的接口</p>
 <ul>
@@ -466,8 +476,7 @@
 <span class="token keyword">public</span> <span class="token keyword">interface</span> <span class="token class-name">WorldClock</span> <span class="token keyword">extends</span> <span class="token class-name">Remote</span> <span class="token punctuation">{</span>  
     <span class="token class-name">LocalDateTime</span> <span class="token function">getLocalDateTime</span><span class="token punctuation">(</span><span class="token class-name">String</span> zoneId<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">RemoteException</span><span class="token punctuation">;</span>  
 <span class="token punctuation">}</span>  <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>​</p>
-<p>然后编写客户端代码获取远程类</p>
+<p>​<br>然后编写客户端代码获取远程对象</p>
 <ul>
 <li>WorldClockClient</li>
 </ul>
@@ -493,25 +502,159 @@
         <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>now<span class="token punctuation">)</span><span class="token punctuation">;</span>  
     <span class="token punctuation">}</span>  
 <span class="token punctuation">}</span>  <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>​</p>
-<p>分别运行客户端与服务端代码</p>
-<p>运行结果</p>
-<p><img src="file:///E:/nah-v0.github.io/source/_posts/%E5%BA%9F%E7%A8%BF/Java-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96-RMI-%E7%AF%87-RMI-%E5%9F%BA%E7%A1%80/image-20230131031224678.png?lastModify=1677743961"></p>
-<h2 id="4-通过-Wireshark-抓包分析-RMI-通信原理"><a href="#4-通过-Wireshark-抓包分析-RMI-通信原理" class="headerlink" title="4. 通过 Wireshark 抓包分析 RMI 通信原理"></a>4. 通过 Wireshark 抓包分析 RMI 通信原理</h2><p>还是跟着师傅研究复现一下</p>
-<h3 id="4-1-Client-向-Registry-1099端口-建立通讯"><a href="#4-1-Client-向-Registry-1099端口-建立通讯" class="headerlink" title="4.1 Client 向 Registry(1099端口)建立通讯"></a>4.1 Client 向 Registry(1099端口)建立通讯</h3><p>前面几个包用于确定通讯协议啥的就调过了，直接从 Call 开始看</p>
-<p><img src="file:///E:/nah-v0.github.io/source/_posts/%E5%BA%9F%E7%A8%BF/Java-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96-RMI-%E7%AF%87-RMI-%E5%9F%BA%E7%A1%80/image-20230131040746731.png?lastModify=1677743961"></p>
-<p>传输了一个序列化内容，可以看到包含我们请求调用的远程类</p>
-<p><img src="file:///E:/nah-v0.github.io/source/_posts/%E5%BA%9F%E7%A8%BF/Java-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96-RMI-%E7%AF%87-RMI-%E5%9F%BA%E7%A1%80/image-20230131041439669.png?lastModify=1677743961"></p>
-<p>随后客户端返回对应类的提供者，然后客户端另起一个端口与返回的地址进行通讯</p>
-<h3 id="4-2-Client-向-Server-获取到的-2887-端口-建立通讯"><a href="#4-2-Client-向-Server-获取到的-2887-端口-建立通讯" class="headerlink" title="4.2 Client 向 Server(获取到的 2887 端口) 建立通讯"></a>4.2 Client 向 Server(获取到的 2887 端口) 建立通讯</h3><p>这里 Wireshark 并没有识别出来为 RMI 协议</p>
-<p><img src="file:///E:/nah-v0.github.io/source/_posts/%E5%BA%9F%E7%A8%BF/Java-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96-RMI-%E7%AF%87-RMI-%E5%9F%BA%E7%A1%80/image-20230131042420146.png?lastModify=1677743961"></p>
-<p>大概就是客户端请求自己所需要的远程对象，然后客户端返回一个</p>
-<p>翻译为代码的话</p>
-<p>Registry registry = LocateRegistry.getRegistry(“127.0.0.1”, 1099);<br>WorldClock worldClock = (WorldClock) registry.lookup(“WorldClock”);</p>
-<h3 id="4-3-Client-向-Server-传递参数"><a href="#4-3-Client-向-Server-传递参数" class="headerlink" title="4.3 Client 向 Server 传递参数"></a>4.3 Client 向 Server 传递参数</h3><p><img src="file:///E:/nah-v0.github.io/source/_posts/%E5%BA%9F%E7%A8%BF/Java-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96-RMI-%E7%AF%87-RMI-%E5%9F%BA%E7%A1%80/image-20230131044729675.png?lastModify=1677743961"></p>
-<p>这一步实现的就是</p>
-<p>LocalDateTime now = worldClock.getLocalDateTime(“Asia/Shanghai”);</p>
-<p>在通信过程中使用序列化进行传递参数，相对应的本地应该也存在反序列化操作，那么这个反序列化操作我们能否从中插一脚呢</p>
+<p>​<br>到这里客户端与服务端的代码均已编写完成</p>
+<h2 id="4-源码分析"><a href="#4-源码分析" class="headerlink" title="4. 源码分析"></a>4. 源码分析</h2><p>接下来深入源码看一下整个过程的 RMI 调用过程实现</p>
+<h3 id="4-1-创建远程服务"><a href="#4-1-创建远程服务" class="headerlink" title="4.1 创建远程服务"></a>4.1 创建远程服务</h3><p>在实例化类处打个断点</p>
+<p>首先步入到 <code>UnicastRemoteObject.exportObject()</code> 方法中</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310193632.png"></p>
+<p>该方法接受了两个参数，一个为 <code>Remote</code> 类，另一个为端口号，根据方法名以及方法描述可知该方法主要用于将远程对象绑定到一个端口上进行监听</p>
+<p>只绑定不处理也没有，所以这里又创建了一个 <code>UnicastServerRef</code> 用来接受与处理绑定端口上的数据，实现该部分功能的主要是 <code>LiveRef</code> 这个类</p>
+<p>跟进 <code>new UnicastServerRef(port)</code></p>
+<p>经过一系列初始化实例化了 <code>LiveRef</code></p>
+<p>查看其中存储的值</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310194959.png"></p>
+<p>id 中存储着分配到的空间编号</p>
+<p>进一步查看 ep 的存储内容</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310195143.png"></p>
+<p>其中存储了当前分配到的 IP 地址与端口号以及一个 <code>TCPTransport</code> 类，也是该类用于处理接收到的 TCP 请求</p>
+<p>到这创建好了处理数据相关的服务</p>
+<p>接下来回到 <code>exportObject()</code> 方法执行远程对象与服务的绑定</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310200127.png"></p>
+<p>判断目标对象是否继承了 <code>UnicastRemoteObject</code>，随后将 <code>LiveRef</code> 写入到远程对象的 <code>ref</code> 中</p>
+<p>随后进入到 <code>UnicastServerRef.exportObject</code> 中</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310200828.png"></p>
+<p>根据该部分的注释可知根据远程对象创建了 <code>stub</code> 与 <code>skeleton</code></p>
+<p>继续往下</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310201022.png"></p>
+<p>根据语句可知 <code>stub</code> 为一个代理对象，接收了远程对象、前面生成的 <code>LiveRef</code>对象以及一个不知道什么玩意</p>
+<p>查看其具体实现内容</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310201554.png"></p>
+<p>先是获取远程对象的类，然后判断是否已存在存根，如果已经存在的话则会直接返回并绑定，不存在的话则继续向下执行创建动态代理</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310202032.png"></p>
+<p>该动态代理也是主要使用 <code>LiveRef </code></p>
+<p>继续往下</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310202151.png"></p>
+<p>还存在一个 setSkeleton() 方法处理远程对象，但是当前用不到</p>
+<p>接着使用 Target 存储到目前为止所有创建封装出来的对象，其中最最主要存储的还是 <code>LiveRef</code> 对象</p>
+<p>继续往下发现将  target 发布了出去</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310202624.png"></p>
+<p>最后跟到了 <code>TCPTransport.exportObject()</code> </p>
+<p>开启了一个监听服务</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310202830.png"></p>
+<p>最后创建了一个 Socket 服务并分配好了端口用来接收数据，在接收到数据之后将会开启一个线程用于处理数据</p>
+<p>到目前为止就创建好了一个服务，正在监听等待</p>
+<p>随后还会将该服务保存在之前创建的 target 中，不然会回头客户端通过 RMI 调用结果找不到其对应的服务</p>
+<p>OK，至此该部分远程服务就创建完成了</p>
+<p>有大佬将该部分的层层封装做了个流程图</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310203517.png"></p>
+<h3 id="4-2-创建注册中心"><a href="#4-2-创建注册中心" class="headerlink" title="4.2 创建注册中心"></a>4.2 创建注册中心</h3><p>前面创建好了远程服务，但是客户端不好找远程服务的确切位置，所以这里还需要个注册中心来充当一个路由的功能</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310203857.png"></p>
+<p>新建了一个 <code>RegistryImpl</code> 对象</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310204221.png"></p>
+<p>经过一些安全检查，最后创建了 <code>LiveRef</code> 对象与 <code>UnicastServerRef</code> 对象，这与创建服务端时的流程差不多</p>
+<p>同样会创建一个存根，这里的存根与创建远程服务时有些区别</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310204654.png"></p>
+<p>在创建动态代理时会检测是否存在一个对应的类存根，这里的 <code>remoteClass</code> 值为 <code>RegisterImpl</code></p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310204833.png"></p>
+<p>进入之后会寻找是否存在一个  <code>RegistryImpl_Stub</code> 的类</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310204922.png"></p>
+<p>这里在  rmi 下是存在一个 <code>RegistryImpl_Stub</code> 类，所以会执行 <code>createStub</code> 方法</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310205101.png"></p>
+<p>这里面直接将 <code>RegistryImpl_Stub</code> 实例化，然后将 <code>ref</code> 塞进去</p>
+<p>然后 <code>Stub</code> 创建完成</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310205433.png"></p>
+<p>与远程服务创建出来的 <code>Stub</code> 所存储的内容差不多，只不过一个是通过动态代理实现，一个由 <code>RegistryImpl_Stub</code> 实现</p>
+<p>由注册中心创建出来的这一部分主要负责与远程服务进行通信</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310205851.png"></p>
+<p>继续往下还创建了一个 <code>Skeleton</code></p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310205922.png"></p>
+<p>继续跟进</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310205934.png"></p>
+<p>该部分也是简单粗暴，实例化了 <code>RegistryImpl_Skel</code> 对象最后存入到 <code>RegistryImpl</code> 中</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310210142.png"></p>
+<p>该部分则用来与客户端进行通信</p>
+<p>最后和远程服务一样将所有创建出来的内容都存储到 Target 中</p>
+<p>到目前为止看一下存储的远程对象</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310210706.png"></p>
+<p>共有三个对象</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310210758.png"></p>
+<p>这是个用于垃圾回收的对象，默认创建</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310210901.png"></p>
+<p>然后就是刚刚创建的注册中心</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310210917.png"></p>
+<p>远程服务</p>
+<p>结构基本上都差不多，区别主要在于 stub</p>
+<h3 id="4-3-远程服务绑定注册中心"><a href="#4-3-远程服务绑定注册中心" class="headerlink" title="4.3 远程服务绑定注册中心"></a>4.3 远程服务绑定注册中心</h3><p>该部分的流程比较简单</p>
+<p>简单来讲就是一张哈希表</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310211313.png"></p>
+<p>首先进行一些检查，继续向下执行</p>
+<p>判断绑定哈希表中是否存在，不存在则进行绑定</p>
+<p>绑定完成</p>
+<h3 id="4-4-客户端请求注册中心-客户端"><a href="#4-4-客户端请求注册中心-客户端" class="headerlink" title="4.4 客户端请求注册中心 - 客户端"></a>4.4 客户端请求注册中心 - 客户端</h3><p>客户端先请求注册中心获得远程对象的代理，然后通过代理进行远程调用方法</p>
+<p>先是获取注册中心</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310212222.png"></p>
+<p>根据传入的 IP 与端口创建了一个 LiveRef</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310212343.png"></p>
+<p>然后创建一个动态代理</p>
+<p>最后也是实现了一个 <code>RegistryImpl_Stub</code> 对象</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310212509.png"></p>
+<p>下一步是去寻找远程对象</p>
+<p>这里进入到 <code>RegistryImpl_Stub.lookup()</code> 方法中</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310212852.png"></p>
+<p>创建了一个输出流，将目标类序列化写入</p>
+<p>然后向下调用了 <code>UnicastRef.invoke()</code> 方法</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310213105.png"></p>
+<p>该方法主要执行 <code>call.executeCall()</code> 最后调用到 <code>StreamRemoteCall.executeCall()</code> 方法</p>
+<p>该方法用于处理客户端的网络请求</p>
+<p>处理完请求之后回到之前</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310213257.png"></p>
+<p>打开输入流并将结果反序列化读取</p>
+<p>这里读取到的输入流是从注册中心获取到的，如果注册中心返回了一个恶意的序列化内容则可能造成客户端被攻击</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310213551.png"></p>
+<p>回到  <code>StreamRemoteCall.executeCall()</code> 中查看处理流程，发现在处理异常时会直接将结果反序列化，此处也可能遭受到攻击</p>
+<p>所以总结一下为只要调用了 <code>UnicastRef.invoke()</code> 即有可能被攻击</p>
+<h3 id="4-5-客户端请求服务端-客户端"><a href="#4-5-客户端请求服务端-客户端" class="headerlink" title="4.5 客户端请求服务端 - 客户端"></a>4.5 客户端请求服务端 - 客户端</h3><p><img src="/../../../../../pic/Pasted%20image%2020230310213955.png"></p>
+<p>首先通过动态代理进行访问</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310214108.png"></p>
+<p>进入</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310214133.png"></p>
+<p>创建了一个新的链接</p>
+<p> <img src="/../../../../../pic/Pasted%20image%2020230310214234.png"></p>
+<p>继续往下，使用 <code>marshalValue()</code> 方法将传入的参数进行序列化，这里的参数为调用远程对象方法的参数</p>
+<p>在序列化完成之后调用了 <code>call.executeCall()</code> 即 <code>StreamRemoteCall.executeCall()</code>，也就是说在此处也有可能被攻击</p>
+<p> <img src="/../../../../../pic/Pasted%20image%2020230310214617.png"></p>
+<p>在处理完数据之后，打开输入流接收返回的数据，然后将数据进行反序列化随后将获取到的值返回</p>
+<p>至此客户端请求服务端的流程结束</p>
+<h3 id="4-6-客户端请求注册中心-注册中心"><a href="#4-6-客户端请求注册中心-注册中心" class="headerlink" title="4.6 客户端请求注册中心 - 注册中心"></a>4.6 客户端请求注册中心 - 注册中心</h3><p>在注册中心的 <code>Skeleton</code> 处打个断点，客户端与注册中心通过 <code>Skeleton</code> 进行交互</p>
+<p>跟着师傅一通找，最后断点</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310215441.png"></p>
+<p>进入调试</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310215734.png"></p>
+<p>这里获取到的 target 为 <code>RegistryImpl_Stub</code> 即与远程服务交互的部分</p>
+<p>然后调用到 <code>disp.dispatch</code></p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310220041.png"></p>
+<p>如果 skel 存在的话则进入到 <code>oldDispatch()</code></p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310220156.png"></p>
+<p>经过一系列处理进入到 <code>skel.dispatch()</code> 即 <code>RegistryImpl_Skel.dispatch()</code> 中</p>
+<p>这里有一个 switch 方法</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310220503.png"></p>
+<p>这里进入到 lookup 方法中所以应该会进入到 case 2 中</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310220549.png"></p>
+<p>进入 case 2 中时先进行了反序列化，该部分获取到的为从客户端序列化传入的要获取的远程对象的名称</p>
+<p>所以在此处客户端可以攻击到注册中心</p>
+<p>其他几个 case 中也存在反序列化所以也可以利用其他方法进行攻击</p>
+<h3 id="4-7-客户端请求服务端-服务端"><a href="#4-7-客户端请求服务端-服务端" class="headerlink" title="4.7 客户端请求服务端 - 服务端"></a>4.7 客户端请求服务端 - 服务端</h3><p>与上面的断点位置一致</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310221036.png"></p>
+<p>这里远程服务接受到了请求</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310221107.png"></p>
+<p>由于没有 <code>skel</code> 属性，所以直接跳过执行下面的语句</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310221215.png"></p>
+<p>这里被反序列化的内容为客户端发送过来的序列化后的参数</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310221318.png"></p>
+<p>所以这里客户端也能攻击注册中心</p>
+<p><img src="/../../../../../pic/Pasted%20image%2020230310221410.png"></p>
+<p>继续往下，在远程服务处理完之后会将结果序列化之后传输给客户端，服务端也能攻击到服务端</p>
+<h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><p><a target="_blank" rel="noopener" href="https://halfblue.github.io/2021/11/02/RMI%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%E4%B9%8B%E4%B8%89%E9%A1%BE%E8%8C%85%E5%BA%90-%E6%94%BB%E5%87%BB%E5%AE%9E%E7%8E%B0/">RMI反序列化漏洞之三顾茅庐-攻击实现 | Halfblue</a></p>
 
                 
             </div>
@@ -894,19 +1037,19 @@
             <div class="article-badge left-badge text-color">
                 <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
             <div class="card">
-                <a href="/2023/02/07/skilllearning/java-an-quan/java-fan-xu-lie-hua/fastjson-pian/java-fan-xu-lie-hua-fastjson-pian-1-2-24-ban-ben-lou-dong-fen-xi/">
+                <a href="/2023/02/07/skilllearning/java-an-quan/java-fan-xu-lie-hua/shiro-pian/java-kuang-jia-shiro-pian-shiro550-lou-dong-fen-xi/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/6.jpg" class="responsive-img" alt="Java 反序列化 Fastjson 篇 1.2.24 版本漏洞分析">
+                        <img src="/medias/featureimages/16.jpg" class="responsive-img" alt="Java 框架 Shiro 篇 Shiro550 漏洞分析">
                         
-                        <span class="card-title">Java 反序列化 Fastjson 篇 1.2.24 版本漏洞分析</span>
+                        <span class="card-title">Java 框架 Shiro 篇 Shiro550 漏洞分析</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            Java 反序列化 Fastjson 篇 1.2.24 版本漏洞分析
+                            Java 框架 Shiro 篇 Shiro550 漏洞分析
                         
                     </div>
                     <div class="publish-info">
@@ -928,8 +1071,8 @@
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/Fastjson-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/">
-                        <span class="chip bg-color">Fastjson 反序列化</span>
+                    <a href="/tags/Shiro-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/">
+                        <span class="chip bg-color">Shiro 反序列化</span>
                     </a>
                     
                 </div>
@@ -943,19 +1086,19 @@
                 下一篇&nbsp;<i class="fas fa-chevron-right"></i>
             </div>
             <div class="card">
-                <a href="/2023/02/07/skilllearning/java-an-quan/java-fan-xu-lie-hua/shiro-pian/java-kuang-jia-shiro-pian-shiro550-lou-dong-fen-xi/">
+                <a href="/2023/02/07/skilllearning/java-an-quan/java-fan-xu-lie-hua/rmi-pian/java-fan-xu-lie-hua-rmi-pian-rmi-gong-ji/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/16.jpg" class="responsive-img" alt="Java 框架 Shiro 篇 Shiro550 漏洞分析">
+                        <img src="/medias/featureimages/14.jpg" class="responsive-img" alt="Java 反序列化 RMI 篇 RMI 攻击">
                         
-                        <span class="card-title">Java 框架 Shiro 篇 Shiro550 漏洞分析</span>
+                        <span class="card-title">Java 反序列化 RMI 篇 RMI 攻击</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            Java 框架 Shiro 篇 Shiro550 漏洞分析
+                            Java 反序列化 RMI 篇 RMI 攻击
                         
                     </div>
                     <div class="publish-info">
@@ -977,8 +1120,8 @@
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/Shiro-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/">
-                        <span class="chip bg-color">Shiro 反序列化</span>
+                    <a href="/tags/RMI-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/">
+                        <span class="chip bg-color">RMI 反序列化</span>
                     </a>
                     
                 </div>
